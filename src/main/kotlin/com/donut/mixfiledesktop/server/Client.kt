@@ -6,7 +6,6 @@ import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
-import io.ktor.client.plugins.logging.*
 import io.ktor.http.*
 import io.ktor.http.content.*
 import io.ktor.serialization.gson.*
@@ -14,7 +13,7 @@ import io.ktor.utils.io.*
 import io.ktor.utils.io.jvm.javaio.*
 import java.io.InputStream
 
-var UPLOAD_RETRY_TIMES = config.upload_retry
+var UPLOAD_RETRY_TIMES = config.uploadRetry
 
 val uploadClient = HttpClient(CIO).config {
     install(ContentNegotiation) {

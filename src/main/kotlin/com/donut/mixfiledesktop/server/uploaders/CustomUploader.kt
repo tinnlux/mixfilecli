@@ -9,9 +9,9 @@ import io.ktor.http.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
-var CUSTOM_UPLOAD_URL = config.custom_url
+var CUSTOM_UPLOAD_URL = config.customUrl
 
-var CUSTOM_REFERER = config.custom_referer
+var CUSTOM_REFERER = config.customReferer
 
 object CustomUploader : Uploader("自定义") {
 

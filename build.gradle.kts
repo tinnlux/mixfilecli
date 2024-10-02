@@ -8,7 +8,7 @@ plugins {
 }
 
 group = "con.donut.mixfilecli"
-version = "1.0.0"
+version = "1.1.0"
 
 application {
     mainClass.set("com.donut.mixfilecli.ApplicationKt")
@@ -48,4 +48,7 @@ dependencies {
     implementation("com.github.amr:mimetypes:0.0.3")
     testImplementation("io.ktor:ktor-server-test-host-jvm")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
 }

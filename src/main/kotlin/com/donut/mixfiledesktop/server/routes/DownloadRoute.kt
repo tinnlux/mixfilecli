@@ -17,7 +17,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlin.io.encoding.ExperimentalEncodingApi
 
-var DOWNLOAD_TASK_COUNT = config.download_task
+var DOWNLOAD_TASK_COUNT = config.downloadTask
 
 @OptIn(ExperimentalEncodingApi::class)
 fun getDownloadRoute(): suspend PipelineContext<Unit, ApplicationCall>.(Unit) -> Unit {

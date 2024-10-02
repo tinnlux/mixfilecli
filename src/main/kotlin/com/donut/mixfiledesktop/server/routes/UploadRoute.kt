@@ -21,7 +21,7 @@ import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Semaphore
 import kotlin.math.ceil
 
-var UPLOAD_TASK_COUNT = config.upload_task
+var UPLOAD_TASK_COUNT = config.uploadTask
 
 
 fun getUploadRoute(): suspend PipelineContext<Unit, ApplicationCall>.(Unit) -> Unit {

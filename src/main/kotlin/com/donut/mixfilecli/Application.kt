@@ -9,28 +9,28 @@ import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
 import io.ktor.server.application.*
-import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.test.setMain
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
 
-val appScope by lazy { MainScope() }
-
 data class Config(
     val uploader: String = "A1",
-    val upload_task: Int = 10,
-    val download_task: Int = 5,
+    val uploadTask: Int = 10,
+    val downloadTask: Int = 5,
     val port: Int = 4719,
-    val upload_retry: Int = 3,
-    val custom_url: String = "",
-    val custom_referer: String = "",
+    val uploadRetry: Int = 3,
+    val customUrl: String = "",
+    val customReferer: String = "",
     val host: String = "0.0.0.0"
 )
 
 var config: Config = Config()
 
 
-@OptIn(ExperimentalHoplite::class)
+@OptIn(ExperimentalHoplite::class, ExperimentalCoroutinesApi::class)
 fun main(args: Array<String>) {
     checkConfig()
     config = ConfigLoaderBuilder.default()
@@ -38,8 +38,11 @@ fun main(args: Array<String>) {
         .withExplicitSealedTypes()
         .build()
         .loadConfigOrThrow<Config>()
+    Dispatchers.setMain(Dispatchers.Default)
+    println(config)
     startServer()
 }
+
 
 fun checkConfig() {
     val currentDir = System.getProperty("user.dir")
