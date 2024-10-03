@@ -196,7 +196,7 @@ To suppress this warning, you need to explicitly provide the \`palette.${t}Chann
     button {
         font-size: max(.6rem, 14px);
     }
-`;let sa=null;function q_(e){const[t,n]=fe(null);if(sa=n,t==null)return null;const{name:r,size:o,shareInfoData:i}=t,s=`${Jo}/api/download?s=${encodeURIComponent(i)}`;return $(Qa,{open:!0,onClick:a=>{a.target===a.currentTarget&&sa(null)},style:{zIndex:"99"},children:$(H_,{className:"shadow",children:[$("h3",{children:["文件: ",r]}),$(ia.CopyToClipboard,{text:`mf://${i}`,onCopy:()=>{zo("复制成功!")},children:$(jn,{variant:"outlined",children:"复制分享码"})}),$(ia.CopyToClipboard,{text:s,onCopy:()=>{zo("复制成功!")},children:$(jn,{variant:"outlined",children:"复制局域网地址"})}),$(jn,{variant:"contained",onClick:()=>{window.open(s)},children:"下载/预览文件(图片视频右键另存为保存)"})]})})}function V_(e){sa(e)}const K_=cn.div`
+`;let sa=null;function q_(e){const[t,n]=fe(null);if(sa=n,t==null)return null;const{name:r,size:o,shareInfoData:i}=t,s=`${Jo}api/download?s=${encodeURIComponent(i)}`;return $(Qa,{open:!0,onClick:a=>{a.target===a.currentTarget&&sa(null)},style:{zIndex:"99"},children:$(H_,{className:"shadow",children:[$("h3",{children:["文件: ",r]}),$(ia.CopyToClipboard,{text:`mf://${i}`,onCopy:()=>{zo("复制成功!")},children:$(jn,{variant:"outlined",children:"复制分享码"})}),$(ia.CopyToClipboard,{text:s,onCopy:()=>{zo("复制成功!")},children:$(jn,{variant:"outlined",children:"复制局域网地址"})}),$(jn,{variant:"contained",onClick:()=>{window.open(s)},children:"下载/预览文件(图片视频右键另存为保存)"})]})})}function V_(e){sa(e)}const K_=cn.div`
     display: flex;
     flex-direction: column;
     gap: 10px;
