@@ -3,6 +3,7 @@ package com.donut.mixfilecli
 import com.donut.mixfilecli.plugins.configureHTTP
 import com.donut.mixfilecli.plugins.configureRouting
 import com.donut.mixfilecli.plugins.configureSerialization
+import com.donut.mixfiledesktop.server.UPLOADERS
 import com.donut.mixfiledesktop.server.serverPort
 import com.donut.mixfiledesktop.server.startServer
 import com.sksamuel.hoplite.ConfigLoaderBuilder
@@ -40,6 +41,7 @@ fun main(args: Array<String>) {
         .loadConfigOrThrow<Config>()
     Dispatchers.setMain(Dispatchers.Default)
     println(config)
+    UPLOADERS
     startServer()
 }
 
