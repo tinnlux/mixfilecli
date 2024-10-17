@@ -10,10 +10,8 @@ import io.ktor.util.*
 
 val UPLOADERS = listOf(A1Uploader, A2Uploader, A3Uploader, CustomUploader)
 
-var currentUploader = config.uploader
 
-
-fun getCurrentUploader() = UPLOADERS.firstOrNull { it.name == currentUploader } ?: A1Uploader
+fun getCurrentUploader() = UPLOADERS.firstOrNull { it.name.contentEquals(config.uploader)} ?: A1Uploader
 
 abstract class Uploader(val name: String) {
 
