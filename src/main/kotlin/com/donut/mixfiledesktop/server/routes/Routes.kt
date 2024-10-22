@@ -3,11 +3,13 @@ package com.donut.mixfiledesktop.server.routes
 
 import com.donut.mixfiledesktop.util.file.resolveMixShareInfo
 import com.donut.mixfiledesktop.util.file.uploadLogs
+import com.donut.mixfiledesktop.util.isNotNull
 import com.donut.mixfiledesktop.util.toJsonString
 import com.google.gson.JsonObject
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.http.content.*
+import io.ktor.server.request.header
 import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
@@ -19,6 +21,9 @@ fun getRoutes(): Routing.() -> Unit {
             get("/download", getDownloadRoute())
             put("/upload", getUploadRoute())
             get("/upload_history") {
+                if (call.request.header("origin").isNotNull()){
+                    return@get call.respondText("此接口禁止跨域", status = HttpStatusCode.Forbidden)
+                }
                 call.respond(uploadLogs.toJsonString())
             }
             get("/file_info") {
