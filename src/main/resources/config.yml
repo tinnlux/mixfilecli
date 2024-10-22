@@ -1,5 +1,5 @@
-# 上传通道 A1 A2 A3 自定义
-uploader: A1
+# 上传通道 线路A1 线路A2 线路A3 自定义
+uploader: "线路A1"
 # 上传并发
 upload_task: 10
 # 上传失败重试
