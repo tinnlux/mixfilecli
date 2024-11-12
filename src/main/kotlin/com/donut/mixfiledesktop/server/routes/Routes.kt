@@ -20,6 +20,7 @@ fun getRoutes(): Routing.() -> Unit {
         route("/api") {
             get("/download", getDownloadRoute())
             put("/upload", getUploadRoute())
+
             get("/upload_history") {
                 if (call.request.header("origin").isNotNull()){
                     return@get call.respondText("此接口禁止跨域", status = HttpStatusCode.Forbidden)

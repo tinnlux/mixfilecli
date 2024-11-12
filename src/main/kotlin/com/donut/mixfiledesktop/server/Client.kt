@@ -4,6 +4,7 @@ import com.donut.mixfilecli.config
 import com.google.gson.GsonBuilder
 import io.ktor.client.*
 import io.ktor.client.engine.cio.*
+import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.http.*
@@ -15,7 +16,7 @@ import java.io.InputStream
 
 var UPLOAD_RETRY_TIMES = config.uploadRetry
 
-val uploadClient = HttpClient(CIO).config {
+val uploadClient = HttpClient(OkHttp).config {
     install(ContentNegotiation) {
         gson()
         register(ContentType.Any, GsonConverter(GsonBuilder().create()))

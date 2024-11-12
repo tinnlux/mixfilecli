@@ -2,8 +2,10 @@ package com.donut.mixfiledesktop.util
 
 import io.ktor.utils.io.ByteReadChannel
 import io.ktor.utils.io.core.readBytes
+import io.ktor.utils.io.readRemaining
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.io.readByteArray
 import java.io.ByteArrayOutputStream
 import java.security.SecureRandom
 import javax.crypto.Cipher
@@ -44,12 +46,12 @@ fun getCipher(mode: Int, key: ByteArray, iv: ByteArray): Cipher {
 }
 
 suspend fun decryptAES(data: ByteReadChannel, key: ByteArray): ByteArray? {
-    val iv = data.readRemaining(12).readBytes()
+    val iv = data.readRemaining(12).readByteArray()
     val cipher = getCipher(Cipher.DECRYPT_MODE, key, iv)
     val result = ByteArrayOutputStream()
     withContext(Dispatchers.IO) {
         while (!data.isClosedForRead) {
-            val buffer = data.readRemaining(1024).readBytes()
+            val buffer = data.readRemaining(1024).readByteArray()
             result.write(cipher.update(buffer))
         }
         result.write(cipher.doFinal())

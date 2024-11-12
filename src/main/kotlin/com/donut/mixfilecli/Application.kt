@@ -1,15 +1,10 @@
 package com.donut.mixfilecli
 
-import com.donut.mixfilecli.plugins.configureHTTP
-import com.donut.mixfilecli.plugins.configureRouting
-import com.donut.mixfilecli.plugins.configureSerialization
 import com.donut.mixfiledesktop.server.UPLOADERS
-import com.donut.mixfiledesktop.server.serverPort
 import com.donut.mixfiledesktop.server.startServer
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
-import io.ktor.server.application.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.setMain
@@ -25,7 +20,7 @@ data class Config(
     val uploadRetry: Int = 3,
     val customUrl: String = "",
     val customReferer: String = "",
-    val host: String = "0.0.0.0"
+    val host: String = "0.0.0.0",
 )
 
 var config: Config = Config()
@@ -55,12 +50,4 @@ fun checkConfig() {
             inputStream?.copyTo(outputStream)
         }
     }
-}
-
-@OptIn(ExperimentalHoplite::class)
-fun Application.module() {
-    serverPort = config.port
-    configureSerialization()
-    configureHTTP()
-    configureRouting()
 }

@@ -1,15 +1,16 @@
 package com.donut.mixfiledesktop.util
 
-import io.ktor.client.request.forms.*
-import io.ktor.http.*
-import io.ktor.util.*
+import io.ktor.client.request.forms.FormBuilder
+import io.ktor.http.Headers
+import io.ktor.http.quote
+import io.ktor.utils.io.InternalAPI
 import java.awt.Desktop
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.net.URI
 import java.net.URLEncoder
 import java.security.MessageDigest
-import java.util.*
+import java.util.Locale
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 import kotlin.io.encoding.Base64

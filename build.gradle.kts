@@ -4,11 +4,11 @@ val logback_version: String by project
 
 plugins {
     kotlin("jvm") version "2.0.20"
-    id("io.ktor.plugin") version "2.3.12"
+    id("io.ktor.plugin") version "3.0.1"
 }
 
 group = "con.donut.mixfilecli"
-version = "1.3.1"
+version = "1.4.0"
 
 application {
     mainClass.set("com.donut.mixfilecli.ApplicationKt")
@@ -28,12 +28,14 @@ ktor {
 }
 
 dependencies {
-    val ktor_version = "2.3.12"
+    val ktor_version = "3.0.1"
     implementation("io.ktor:ktor-client-core:$ktor_version")
     implementation("io.ktor:ktor-client-cio:$ktor_version")
+    implementation("io.ktor:ktor-client-okhttp:$ktor_version")
     implementation("io.ktor:ktor-client-logging:$ktor_version")
     implementation("io.ktor:ktor-client-content-negotiation:$ktor_version")
     implementation("io.ktor:ktor-serialization-gson:$ktor_version")
+    implementation("io.ktor:ktor-server-netty:$ktor_version")
     implementation("io.ktor:ktor-server-content-negotiation-jvm")
     implementation("com.sksamuel.hoplite:hoplite-core:2.8.2")
     implementation("com.sksamuel.hoplite:hoplite-yaml:2.8.2")

@@ -16,6 +16,7 @@ import com.google.gson.annotations.SerializedName
 import io.ktor.client.request.header
 import io.ktor.client.request.prepareGet
 import io.ktor.client.statement.bodyAsChannel
+import io.ktor.utils.io.discard
 import java.net.URLEncoder
 
 

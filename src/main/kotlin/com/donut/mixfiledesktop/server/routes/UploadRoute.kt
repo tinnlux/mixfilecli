@@ -11,6 +11,7 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
+import io.ktor.server.routing.RoutingHandler
 import io.ktor.util.pipeline.*
 import io.ktor.utils.io.*
 import io.ktor.utils.io.core.*
@@ -24,7 +25,7 @@ import kotlin.math.ceil
 var UPLOAD_TASK_COUNT = config.uploadTask
 
 
-fun getUploadRoute(): suspend PipelineContext<Unit, ApplicationCall>.(Unit) -> Unit {
+fun getUploadRoute(): RoutingHandler {
     return route@{
         val key = generateRandomByteArray(16)
         val name = call.request.queryParameters["name"]

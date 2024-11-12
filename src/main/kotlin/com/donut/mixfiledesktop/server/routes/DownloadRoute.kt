@@ -9,6 +9,7 @@ import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
+import io.ktor.server.routing.RoutingHandler
 import io.ktor.util.pipeline.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.Deferred
@@ -20,7 +21,7 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 var DOWNLOAD_TASK_COUNT = config.downloadTask
 
 @OptIn(ExperimentalEncodingApi::class)
-fun getDownloadRoute(): suspend PipelineContext<Unit, ApplicationCall>.(Unit) -> Unit {
+fun getDownloadRoute(): RoutingHandler {
     return route@{
         val shareInfoData = call.request.queryParameters["s"]
         val referer = call.request.queryParameters["referer"]
