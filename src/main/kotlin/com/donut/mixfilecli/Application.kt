@@ -5,9 +5,7 @@ import com.donut.mixfiledesktop.server.startServer
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.test.setMain
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -34,7 +32,6 @@ fun main(args: Array<String>) {
         .withExplicitSealedTypes()
         .build()
         .loadConfigOrThrow<Config>()
-    Dispatchers.setMain(Dispatchers.Default)
     println(config)
     UPLOADERS
     startServer()

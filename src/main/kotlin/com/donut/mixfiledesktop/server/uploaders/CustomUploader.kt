@@ -21,7 +21,7 @@ object CustomUploader : Uploader("自定义") {
         }.also {
             val referer = it.headers["referer"]
             if (!referer.isNullOrEmpty()) {
-                withContext(Dispatchers.Main) {
+                withContext(Dispatchers.Default) {
                     CUSTOM_REFERER = referer
                 }
             }

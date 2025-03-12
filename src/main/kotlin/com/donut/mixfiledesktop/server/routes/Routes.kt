@@ -1,6 +1,7 @@
 package com.donut.mixfiledesktop.server.routes
 
 
+import com.donut.mixfiledesktop.server.utils.concurrencyLimit
 import com.donut.mixfiledesktop.util.file.resolveMixShareInfo
 import com.donut.mixfiledesktop.util.file.uploadLogs
 import com.donut.mixfiledesktop.util.isNotNull
@@ -22,7 +23,7 @@ fun getRoutes(): Routing.() -> Unit {
             put("/upload", getUploadRoute())
 
             get("/upload_history") {
-                if (call.request.header("origin").isNotNull()){
+                if (call.request.header("origin").isNotNull()) {
                     return@get call.respondText("此接口禁止跨域", status = HttpStatusCode.Forbidden)
                 }
                 call.respond(uploadLogs.toJsonString())
