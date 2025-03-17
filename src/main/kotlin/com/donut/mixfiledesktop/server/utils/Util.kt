@@ -3,11 +3,9 @@ package com.donut.mixfiledesktop.server.utils
 import com.donut.mixfiledesktop.util.genRandomString
 import com.donut.mixfiledesktop.util.generateRandomByteArray
 import com.donut.mixfiledesktop.util.ignoreError
-import io.ktor.http.Headers
-import io.ktor.http.HttpHeaders
+import io.ktor.http.*
 import io.ktor.server.routing.*
 import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.job
 import kotlinx.coroutines.launch
 import java.util.concurrent.CopyOnWriteArrayList
 

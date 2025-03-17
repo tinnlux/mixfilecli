@@ -5,13 +5,14 @@ import com.donut.mixfiledesktop.server.uploaders.A3Uploader
 import com.donut.mixfiledesktop.server.uploaders.CustomUploader
 import com.donut.mixfiledesktop.server.uploaders.hidden.A1Uploader
 import com.donut.mixfiledesktop.server.uploaders.hidden.A2Uploader
+import com.donut.mixfiledesktop.server.utils.bean.hashMixSHA256
 import com.donut.mixfiledesktop.util.encryptAES
 import io.ktor.util.*
 
 val UPLOADERS = listOf(A1Uploader, A2Uploader, A3Uploader, CustomUploader)
 
 
-fun getCurrentUploader() = UPLOADERS.firstOrNull { it.name.contentEquals(config.uploader)} ?: A1Uploader
+fun getCurrentUploader() = UPLOADERS.firstOrNull { it.name.contentEquals(config.uploader) } ?: A1Uploader
 
 abstract class Uploader(val name: String) {
 
@@ -51,7 +52,7 @@ abstract class Uploader(val name: String) {
     suspend fun upload(head: ByteArray, fileData: ByteArray, key: ByteArray): String {
         val encryptedData = encryptBytes(head, fileData, key)
         try {
-            return doUpload(encryptedData)
+            return doUpload(encryptedData) + "#${fileData.hashMixSHA256()}"
         } finally {
 
         }

@@ -3,22 +3,18 @@ package com.donut.mixfiledesktop.server.utils.bean
 
 import com.donut.mixfiledesktop.server.Uploader
 import com.donut.mixfiledesktop.server.uploadClient
+import com.donut.mixfiledesktop.util.*
 import com.donut.mixfiledesktop.util.basen.Alphabet
 import com.donut.mixfiledesktop.util.basen.BigIntBaseN
-import com.donut.mixfiledesktop.util.compressGzip
-import com.donut.mixfiledesktop.util.decompressGzip
-import com.donut.mixfiledesktop.util.decryptAES
-import com.donut.mixfiledesktop.util.encryptAES
 import com.donut.mixfiledesktop.util.file.parseFileMimeType
-import com.donut.mixfiledesktop.util.hashMD5
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
-import io.ktor.client.request.header
-import io.ktor.client.request.prepareGet
-import io.ktor.client.statement.bodyAsChannel
-import io.ktor.utils.io.discard
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.utils.io.*
 import java.net.URLEncoder
 
+fun ByteArray.hashMixSHA256() = MixShareInfo.ENCODER.encode(hashSHA256())
 
 data class MixShareInfo(
     @SerializedName("f") val fileName: String,
@@ -96,6 +92,15 @@ data class MixShareInfo(
             val channel = it.bodyAsChannel()
             channel.discard(headSize.toLong())
             decryptAES(channel, ENCODER.decode(key))
+        }
+        if (result != null) {
+            val hash = url.split("#").getOrNull(1)
+            if (hash != null) {
+                val currentHash = result.hashMixSHA256()
+                if (!currentHash.contentEquals(hash)) {
+                    throw Exception("文件遭到篡改")
+                }
+            }
         }
         return result
     }

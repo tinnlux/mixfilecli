@@ -5,9 +5,8 @@ import com.donut.mixfiledesktop.server.uploadClient
 import com.donut.mixfiledesktop.server.utils.fileFormHeaders
 import com.donut.mixfiledesktop.util.add
 import com.google.gson.JsonObject
-import io.ktor.client.call.body
-import io.ktor.client.request.forms.formData
-import io.ktor.client.request.forms.submitFormWithBinaryData
+import io.ktor.client.call.*
+import io.ktor.client.request.forms.*
 
 object A3Uploader : Uploader("线路A3") {
 

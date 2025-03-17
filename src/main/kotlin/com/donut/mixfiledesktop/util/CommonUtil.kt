@@ -1,16 +1,15 @@
 package com.donut.mixfiledesktop.util
 
-import io.ktor.client.request.forms.FormBuilder
-import io.ktor.http.Headers
-import io.ktor.http.quote
-import io.ktor.utils.io.InternalAPI
+import io.ktor.client.request.forms.*
+import io.ktor.http.*
+import io.ktor.utils.io.*
 import java.awt.Desktop
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.net.URI
 import java.net.URLEncoder
 import java.security.MessageDigest
-import java.util.Locale
+import java.util.*
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 import kotlin.io.encoding.Base64
@@ -50,23 +49,30 @@ fun ByteArray.toHex(): String {
     return sb.toString()
 }
 
-fun String.hashMD5() = calculateHash("MD5")
+fun String.hashMD5() = hashToHexString("MD5")
 
-fun String.hashSHA256() = calculateHash("SHA-256")
+fun String.hashSHA256() = hashToHexString("SHA-256")
 
-fun String.calculateHash(algorithm: String): ByteArray {
+fun String.hashToHexString(algorithm: String): ByteArray {
     val md = MessageDigest.getInstance(algorithm)
     md.update(this.toByteArray())
     return md.digest()
 }
 
-fun ByteArray.calculateHash(algorithm: String): String {
-    val md = MessageDigest.getInstance(algorithm)
-    md.update(this)
-    return md.digest().toHex()
+fun ByteArray.hashToHexString(algorithm: String): String {
+    return calcHash(algorithm).toHex()
 }
 
-fun ByteArray.hashSHA256() = calculateHash("SHA-256")
+fun ByteArray.calcHash(algorithm: String): ByteArray {
+    val md = MessageDigest.getInstance(algorithm)
+    md.update(this)
+    return md.digest()
+}
+
+fun ByteArray.hashSHA256() = calcHash("SHA-256")
+
+fun ByteArray.hashSHA256String() = hashToHexString("SHA-256")
+
 
 fun String.decodeHex(): ByteArray {
     check(length % 2 == 0) { "Must have an even length" }

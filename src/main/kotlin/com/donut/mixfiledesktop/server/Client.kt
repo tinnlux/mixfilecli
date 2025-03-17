@@ -3,8 +3,7 @@ package com.donut.mixfiledesktop.server
 import com.donut.mixfilecli.config
 import com.google.gson.GsonBuilder
 import io.ktor.client.*
-import io.ktor.client.engine.cio.*
-import io.ktor.client.engine.okhttp.OkHttp
+import io.ktor.client.engine.okhttp.*
 import io.ktor.client.plugins.*
 import io.ktor.client.plugins.contentnegotiation.*
 import io.ktor.http.*

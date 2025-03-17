@@ -8,11 +8,9 @@ import com.donut.mixfiledesktop.server.utils.bean.MixShareInfo
 import com.donut.mixfiledesktop.util.file.addUploadLog
 import com.donut.mixfiledesktop.util.generateRandomByteArray
 import io.ktor.http.*
-import io.ktor.server.application.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
-import io.ktor.server.routing.RoutingHandler
-import io.ktor.util.pipeline.*
+import io.ktor.server.routing.*
 import io.ktor.utils.io.*
 import io.ktor.utils.io.core.*
 import kotlinx.coroutines.Deferred
@@ -20,6 +18,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.sync.Semaphore
+import kotlinx.io.readByteArray
 import kotlin.math.ceil
 
 var UPLOAD_TASK_COUNT = config.uploadTask
@@ -78,12 +77,12 @@ suspend fun uploadFile(
 
         while (!channel.isClosedForRead) {
             semaphore.acquire()
-            val fileData = channel.readRemaining(chunkSize).readBytes()
+            val fileData = channel.readRemaining(chunkSize).readByteArray()
             val currentIndex = fileIndex
             fileIndex++
             tasks.add(async {
                 try {
-                    val url = uploader.upload(head, fileData, secret) ?: return@async null
+                    val url = uploader.upload(head, fileData, secret)
                     fileList[currentIndex] = url
                 } finally {
                     semaphore.release()
@@ -98,7 +97,6 @@ suspend fun uploadFile(
             MixFile(chunkSize = chunkSize, version = 0, fileList = fileList, fileSize = fileSize)
         val mixFileUrl =
             uploader.upload(head, mixFile.toBytes(), secret)
-                ?: return@coroutineScope null
         return@coroutineScope mixFileUrl
     }
 }

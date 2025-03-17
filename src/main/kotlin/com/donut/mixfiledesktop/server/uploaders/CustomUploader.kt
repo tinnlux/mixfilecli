@@ -17,15 +17,15 @@ object CustomUploader : Uploader("自定义") {
 
     override suspend fun genHead(): ByteArray {
         return uploadClient.get {
-            url(CUSTOM_UPLOAD_URL)
-        }.also {
-            val referer = it.headers["referer"]
-            if (!referer.isNullOrEmpty()) {
-                withContext(Dispatchers.Default) {
-                    CUSTOM_REFERER = referer
+                url(CUSTOM_UPLOAD_URL)
+            }.also {
+                val referer = it.headers["referer"]
+                if (!referer.isNullOrEmpty()) {
+                    withContext(Dispatchers.Default) {
+                        CUSTOM_REFERER = referer
+                    }
                 }
-            }
-        }.readBytes()
+            }.readRawBytes()
     }
 
     override val referer: String
