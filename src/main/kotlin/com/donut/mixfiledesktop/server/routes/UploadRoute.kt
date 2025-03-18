@@ -26,7 +26,7 @@ var UPLOAD_TASK_COUNT = config.uploadTask
 
 fun getUploadRoute(): RoutingHandler {
     return route@{
-        val key = generateRandomByteArray(16)
+        val key = generateRandomByteArray(32)
         val name = call.request.queryParameters["name"]
         if (name.isNullOrEmpty()) {
             call.respondText("需要文件名称", status = HttpStatusCode.InternalServerError)
