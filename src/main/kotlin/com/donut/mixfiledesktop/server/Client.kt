@@ -20,7 +20,8 @@ val uploadClient = HttpClient(OkHttp) {
     engine {
         config {
             val dispatcher = Dispatcher()
-            dispatcher.maxRequestsPerHost = 100
+            dispatcher.maxRequestsPerHost = Int.MAX_VALUE
+            dispatcher.maxRequests = Int.MAX_VALUE
             dispatcher(dispatcher)
         }
     }
