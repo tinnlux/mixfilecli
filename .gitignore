@@ -3,7 +3,7 @@ build/
 !gradle/wrapper/gradle-wrapper.jar
 !**/src/main/**/build/
 !**/src/test/**/build/
-/src/main/kotlin/com/donut/mixfiledesktop/server/uploaders/hidden
+/src/main/kotlin/com/donut/mixfile/server/core/uploaders/hidden
 
 ### STS ###
 .apt_generated

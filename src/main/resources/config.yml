@@ -3,7 +3,7 @@ uploader: "线路A1"
 # 上传并发
 upload_task: 10
 # 上传失败重试
-upload_retry: 3
+upload_retry: 10
 #下载并发
 download_task: 5
 # 端口
