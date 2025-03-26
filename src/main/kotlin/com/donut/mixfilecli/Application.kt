@@ -17,9 +17,14 @@ import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
 import io.ktor.server.application.*
-import io.ktor.util.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import java.awt.Color
+import java.awt.image.BufferedImage
 import java.io.*
+import java.util.*
+import javax.imageio.ImageIO
+import javax.imageio.stream.ImageOutputStream
+import javax.imageio.stream.MemoryCacheImageOutputStream
 
 data class Config(
     val uploader: String = "A1",
@@ -34,6 +39,46 @@ data class Config(
 
 var config: Config = Config()
 
+fun createRandomGifByteArray(): ByteArray {
+    val random = Random()
+
+    // 随机生成GIF的宽度和高度（50-200像素之间）
+    val width = random.nextInt(101) + 50
+    val height = random.nextInt(101) + 50
+
+    val byteArrayOutputStream = ByteArrayOutputStream()
+    val outputStream: ImageOutputStream = MemoryCacheImageOutputStream(byteArrayOutputStream)
+
+    // 创建GIF写入器
+    val writer = ImageIO.getImageWritersByFormatName("gif").next()
+    writer.output = outputStream
+
+    // 开始写入GIF
+    writer.prepareWriteSequence(null)
+    val image = BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB)
+    val graphics = image.createGraphics()
+
+    // 随机生成颜色
+    val randomColor = Color(
+        random.nextInt(256),  // R
+        random.nextInt(256),  // G
+        random.nextInt(256)   // B
+    )
+
+    // 填充背景色
+    graphics.color = randomColor
+    graphics.fillRect(0, 0, width, height)
+
+    // 清理graphics
+    graphics.dispose()
+    ImageIO.write(image, "gif", outputStream)
+
+    // 结束写入
+    writer.endWriteSequence()
+    outputStream.close()
+
+    return byteArrayOutputStream.toByteArray()
+}
 
 @OptIn(ExperimentalHoplite::class, ExperimentalCoroutinesApi::class)
 fun main(args: Array<String>) {
@@ -74,7 +119,7 @@ fun main(args: Array<String>) {
         }
 
         override fun genDefaultImage(): ByteArray {
-            return "R0lGODlhAQABAIABAP///wAAACH5BAEKAAEALAAAAAABAAEAAAICTAEAOw==".decodeBase64Bytes()
+            return createRandomGifByteArray()
         }
 
         override fun getFileHistory(): String {
