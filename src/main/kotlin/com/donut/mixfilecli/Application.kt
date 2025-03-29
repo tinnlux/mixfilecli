@@ -147,7 +147,7 @@ fun main(args: Array<String>) {
     }
     println("MixFile已在 ${config.host}:${server.serverPort} 启动")
     System.setOut(PrintStream(OutputStream.nullOutputStream()))
-    server.start()
+    server.start(true)
 }
 
 

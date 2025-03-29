@@ -5,14 +5,18 @@ import com.donut.mixfile.server.core.MixFileServer
 import com.donut.mixfile.server.core.utils.isNotNull
 import com.donut.mixfile.server.core.utils.parseFileMimeType
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
-import io.ktor.http.*
-import io.ktor.server.request.*
-import io.ktor.server.response.*
+import io.ktor.http.ContentType
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.request.header
+import io.ktor.server.request.path
+import io.ktor.server.response.respond
+import io.ktor.server.response.respondBytesWriter
+import io.ktor.server.response.respondText
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
 import io.ktor.server.routing.put
 import io.ktor.server.routing.route
-import io.ktor.utils.io.jvm.javaio.*
+import io.ktor.utils.io.jvm.javaio.toOutputStream
 
 fun MixFileServer.getRoutes(): Routing.() -> Unit {
 

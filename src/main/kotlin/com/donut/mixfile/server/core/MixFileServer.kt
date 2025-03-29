@@ -7,24 +7,26 @@ import com.donut.mixfile.server.core.utils.bean.MixShareInfo
 import com.donut.mixfile.server.core.utils.genRandomString
 import com.donut.mixfile.server.core.utils.ignoreError
 import com.donut.mixfile.server.core.utils.registerJson
-import io.ktor.http.*
-import io.ktor.server.application.*
-import io.ktor.server.engine.*
-import io.ktor.server.netty.*
-import io.ktor.server.plugins.contentnegotiation.*
-import io.ktor.server.plugins.cors.routing.*
-import io.ktor.server.plugins.statuspages.*
-import io.ktor.server.response.*
-import io.ktor.server.routing.*
+import io.ktor.http.HttpHeaders
+import io.ktor.http.HttpMethod
+import io.ktor.http.HttpStatusCode
+import io.ktor.server.application.ApplicationCall
+import io.ktor.server.application.ApplicationCallPipeline
+import io.ktor.server.application.call
+import io.ktor.server.application.install
+import io.ktor.server.engine.embeddedServer
+import io.ktor.server.netty.Netty
+import io.ktor.server.plugins.contentnegotiation.ContentNegotiation
+import io.ktor.server.plugins.cors.routing.CORS
+import io.ktor.server.plugins.statuspages.StatusPages
+import io.ktor.server.response.respondText
+import io.ktor.server.routing.routing
 import java.io.InputStream
 import java.net.ServerSocket
 
 
 abstract class MixFileServer(
     var serverPort: Int = 4719,
-    var accessKey: String = genRandomString(32),
-    var enableAccessKey: Boolean = false,
-    var accessKeyTip: String = "Require Access Key",
 ) {
 
     init {
@@ -34,6 +36,9 @@ abstract class MixFileServer(
     abstract val downloadTaskCount: Int
     abstract val uploadTaskCount: Int
     abstract val requestRetryCount: Int
+    open val enableAccessKey: Boolean = false
+    open val accessKey: String = genRandomString(32)
+    open val accessKeyTip: String = "Require Access Key"
 
     abstract fun onError(error: Throwable)
 
@@ -73,7 +78,7 @@ abstract class MixFileServer(
     }
 
 
-    fun start() {
+    fun start(wait: Boolean) {
         serverPort = findAvailablePort(serverPort) ?: serverPort
         embeddedServer(Netty, port = serverPort, watchPaths = emptyList()) {
             intercept(ApplicationCallPipeline.Call) {
@@ -107,7 +112,7 @@ abstract class MixFileServer(
                 }
             }
             routing(getRoutes())
-        }.start(wait = true)
+        }.start(wait = wait)
     }
 }
 

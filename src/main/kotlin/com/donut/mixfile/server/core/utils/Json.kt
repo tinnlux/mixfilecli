@@ -4,7 +4,7 @@ import com.alibaba.fastjson2.JSON
 import com.alibaba.fastjson2.JSONWriter
 import com.alibaba.fastjson2.writer.ObjectWriter
 import java.lang.reflect.Type
-import java.util.*
+import java.util.Date
 
 object MillisDateWriter : ObjectWriter<Date?> {
     override fun write(

@@ -2,7 +2,7 @@ package com.donut.mixfile.server.core
 
 import com.donut.mixfile.server.core.aes.encryptAES
 import com.donut.mixfile.server.core.utils.bean.hashMixSHA256
-import io.ktor.client.*
+import io.ktor.client.HttpClient
 
 abstract class Uploader(val name: String) {
 
@@ -57,6 +57,7 @@ abstract class Uploader(val name: String) {
     }
 
     open suspend fun genHead(client: HttpClient): ByteArray? = null
+
     private fun encryptBytes(head: ByteArray, fileData: ByteArray, key: ByteArray): ByteArray {
         return head + (encryptAES(fileData, key))
     }
