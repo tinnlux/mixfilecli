@@ -7,18 +7,13 @@ import com.alibaba.fastjson2.toJSONString
 import com.donut.mixfile.server.core.Uploader
 import com.donut.mixfile.server.core.aes.decryptAES
 import com.donut.mixfile.server.core.aes.encryptAES
+import com.donut.mixfile.server.core.utils.*
 import com.donut.mixfile.server.core.utils.basen.Alphabet
 import com.donut.mixfile.server.core.utils.basen.BigIntBaseN
-import com.donut.mixfile.server.core.utils.compressGzip
-import com.donut.mixfile.server.core.utils.decompressGzip
-import com.donut.mixfile.server.core.utils.hashMD5
-import com.donut.mixfile.server.core.utils.hashSHA256
-import com.donut.mixfile.server.core.utils.parseFileMimeType
-import io.ktor.client.HttpClient
-import io.ktor.client.request.header
-import io.ktor.client.request.prepareGet
-import io.ktor.client.statement.bodyAsChannel
-import io.ktor.utils.io.discard
+import io.ktor.client.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import io.ktor.utils.io.*
 
 
 fun ByteArray.hashMixSHA256() = MixShareInfo.ENCODER.encode(hashSHA256())

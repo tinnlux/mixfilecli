@@ -101,7 +101,7 @@ fun main(args: Array<String>) {
             get() = config.downloadTask
         override val uploadTaskCount: Int
             get() = config.uploadTask
-        override val requestRetryCount: Int
+        override val requestRetryCount
             get() = config.uploadRetry
 
         override fun onError(error: Throwable) {

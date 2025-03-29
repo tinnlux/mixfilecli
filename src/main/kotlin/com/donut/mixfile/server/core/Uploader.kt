@@ -2,7 +2,7 @@ package com.donut.mixfile.server.core
 
 import com.donut.mixfile.server.core.aes.encryptAES
 import com.donut.mixfile.server.core.utils.bean.hashMixSHA256
-import io.ktor.client.HttpClient
+import io.ktor.client.*
 
 abstract class Uploader(val name: String) {
 

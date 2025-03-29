@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "con.donut.mixfilecli"
-version = "1.6.1"
+version = "1.6.2"
 
 application {
     mainClass.set("com.donut.mixfilecli.ApplicationKt")
@@ -40,6 +40,7 @@ ktor {
 }
 
 dependencies {
+    implementation("io.ktor:ktor-client-cio-jvm:3.1.1")
     val ktor_version = "3.1.1"
     implementation("io.ktor:ktor-client-core:$ktor_version")
     implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.10")
