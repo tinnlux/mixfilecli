@@ -28,6 +28,9 @@ data class MixShareInfo(
     @JSONField(name = "r") val referer: String,
 ) {
 
+    @JSONField(serialize = false)
+    var cachedCode: String? = null
+
     companion object {
 
         val ENCODER =
@@ -36,7 +39,9 @@ data class MixShareInfo(
         fun fromString(string: String) = fromJson(dec(string))
 
         fun tryFromString(string: String) = try {
-            fromString(string)
+            fromString(string).also {
+                it.cachedCode = string
+            }
         } catch (e: Exception) {
             null
         }
@@ -58,8 +63,11 @@ data class MixShareInfo(
 
     }
 
+    fun shareCode() = enc(toJson()).also { cachedCode = it }
+
+
     override fun toString(): String {
-        return enc(toJson())
+        return cachedCode ?: shareCode()
     }
 
     private fun toJson(): String = this.toJSONString()

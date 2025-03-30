@@ -49,7 +49,8 @@ abstract class Uploader(val name: String) {
         key: ByteArray,
         mixFileServer: MixFileServer
     ): String {
-        val policy = constantDelay<Throwable>(delayMillis = 100L) + stopAtAttempts(mixFileServer.requestRetryCount)
+        val policy =
+            constantDelay<Throwable>(delayMillis = 100L) + stopAtAttempts(mixFileServer.requestRetryCount)
         return retry(policy) {
             val encryptedData = encryptBytes(head, fileData, key)
             try {
