@@ -20,7 +20,7 @@ import io.ktor.utils.io.*
 fun ByteArray.hashMixSHA256() = MixShareInfo.ENCODER.encode(hashSHA256())
 
 data class MixShareInfo(
-    @JSONField(name = "f") var fileName: String,
+    @JSONField(name = "f") val fileName: String,
     @JSONField(name = "s") val fileSize: Long,
     @JSONField(name = "h") val headSize: Int,
     @JSONField(name = "u") val url: String,
