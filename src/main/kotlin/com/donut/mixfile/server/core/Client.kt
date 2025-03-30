@@ -25,14 +25,6 @@ val MixFileServer.httpClient
         install(ContentNegotiation) {
 
         }
-        install(HttpRequestRetry) {
-            maxRetries = uploadTaskCount
-            retryOnException(retryOnTimeout = true)
-            retryOnServerErrors()
-            delayMillis { retry ->
-                retry * 100L
-            }
-        }
         install(HttpTimeout) {
             requestTimeoutMillis = 1000 * 120
         }

@@ -11,6 +11,7 @@ import com.donut.mixfile.server.core.utils.*
 import com.donut.mixfile.server.core.utils.basen.Alphabet
 import com.donut.mixfile.server.core.utils.basen.BigIntBaseN
 import io.ktor.client.*
+import io.ktor.client.plugins.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.utils.io.*
@@ -70,7 +71,16 @@ data class MixShareInfo(
     ): ByteArray? {
         val transformedUrl = Uploader.transformUrl(url)
         val transformedReferer = Uploader.transformReferer(url, referer)
-        val result: ByteArray? = client.prepareGet(transformedUrl) {
+        val result: ByteArray? = client.config {
+            install(HttpRequestRetry) {
+                maxRetries = 3
+                retryOnException(retryOnTimeout = true)
+                retryOnServerErrors()
+                delayMillis { retry ->
+                    retry * 100L
+                }
+            }
+        }.prepareGet(transformedUrl) {
             if (transformedReferer.trim().isNotEmpty()) {
                 header("Referer", transformedReferer)
             }

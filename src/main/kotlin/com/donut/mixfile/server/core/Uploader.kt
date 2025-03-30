@@ -2,6 +2,10 @@ package com.donut.mixfile.server.core
 
 import com.donut.mixfile.server.core.aes.encryptAES
 import com.donut.mixfile.server.core.utils.bean.hashMixSHA256
+import com.github.michaelbull.retry.policy.constantDelay
+import com.github.michaelbull.retry.policy.plus
+import com.github.michaelbull.retry.policy.stopAtAttempts
+import com.github.michaelbull.retry.retry
 import io.ktor.client.*
 
 abstract class Uploader(val name: String) {
@@ -45,14 +49,17 @@ abstract class Uploader(val name: String) {
         key: ByteArray,
         mixFileServer: MixFileServer
     ): String {
-        val encryptedData = encryptBytes(head, fileData, key)
-        try {
-            return doUpload(
-                encryptedData,
-                mixFileServer.httpClient
-            ) + "#${fileData.hashMixSHA256()}"
-        } finally {
-            mixFileServer.onUploadData(encryptedData)
+        val policy = constantDelay<Throwable>(delayMillis = 100L) + stopAtAttempts(mixFileServer.requestRetryCount)
+        return retry(policy) {
+            val encryptedData = encryptBytes(head, fileData, key)
+            try {
+                doUpload(
+                    encryptedData,
+                    mixFileServer.httpClient
+                ) + "#${fileData.hashMixSHA256()}"
+            } finally {
+                mixFileServer.onUploadData(encryptedData)
+            }
         }
     }
 
