@@ -123,7 +123,7 @@ fun main(args: Array<String>) {
         }
 
         override fun getFileHistory(): String {
-            return uploadLogs.toJSONString()
+            return uploadLogs.asReversed().toJSONString()
         }
 
         override fun getUploadTask(call: ApplicationCall, name: String, size: Long, add: Boolean): MixUploadTask {

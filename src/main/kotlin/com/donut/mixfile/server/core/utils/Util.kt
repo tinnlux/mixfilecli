@@ -11,6 +11,8 @@ import io.ktor.utils.io.*
 import kotlinx.coroutines.launch
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
+import java.net.MalformedURLException
+import java.net.URL
 import java.net.URLEncoder
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.zip.GZIPInputStream
@@ -29,6 +31,26 @@ fun genRandomString(
         .map { kotlin.random.Random.nextInt(0, charPool.size) }
         .map(charPool::get)
         .joinToString("")
+}
+
+fun isValidURL(urlString: String): Boolean {
+    return try {
+        val url = URL(urlString)
+
+        // 获取协议和主机名
+        val protocol = url.protocol
+        val host = url.host
+
+        // 检查协议和主机名是否为空
+        if (protocol.isNullOrBlank() || host.isNullOrBlank()) {
+            return false
+        }
+
+        // 可选：限制协议类型
+        protocol in listOf("http", "https", "ftp")
+    } catch (e: MalformedURLException) {
+        false
+    }
 }
 
 
