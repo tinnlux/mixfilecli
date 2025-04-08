@@ -5,6 +5,7 @@ import com.donut.mixfile.server.core.httpClient
 import com.donut.mixfile.server.core.utils.SortedTask
 import com.donut.mixfile.server.core.utils.bean.MixShareInfo
 import com.donut.mixfile.server.core.utils.encodeURL
+import com.donut.mixfile.server.core.utils.parseFileMimeType
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import io.ktor.http.*
 import io.ktor.server.application.*
@@ -22,9 +23,8 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 @OptIn(ExperimentalEncodingApi::class)
 fun MixFileServer.getDownloadRoute(): RoutingHandler {
     return route@{
-        val shareInfoData = call.parameters["s"]
-        val referer = call.parameters["referer"]
-        var name = call.parameters["name"]
+        val param = call.parameters
+        val shareInfoData = param["s"]
         if (shareInfoData == null) {
             call.respondText("分享信息为空", status = HttpStatusCode.InternalServerError)
             return@route
@@ -42,9 +42,12 @@ fun MixFileServer.getDownloadRoute(): RoutingHandler {
             )
             return@route
         }
-        if (name.isNullOrEmpty()) {
-            name = shareInfo.fileName
-        }
+
+        val referer =
+            (param["referer"] ?: "").ifBlank { shareInfo.referer }
+        val name =
+            (param["name"] ?: "").ifBlank { shareInfo.fileName }
+
         var contentLength = shareInfo.fileSize
         val range: LongRange? = call.request.ranges()?.mergeToSingle(contentLength)
         call.response.apply {
@@ -63,7 +66,7 @@ fun MixFileServer.getDownloadRoute(): RoutingHandler {
             }
             contentLength = mixFile.fileSize - range.first
         }
-        responseDownloadFileStream(call, fileList, contentLength, shareInfo, referer)
+        responseDownloadFileStream(call, fileList, contentLength, shareInfo, referer, name)
     }
 }
 
@@ -72,12 +75,13 @@ private suspend fun MixFileServer.responseDownloadFileStream(
     fileDataList: List<Pair<String, Int>>,
     contentLength: Long,
     shareInfo: MixShareInfo,
-    referer: String?,
+    referer: String = shareInfo.referer,
+    name: String = shareInfo.fileName
 ) {
     coroutineScope {
         val fileList = fileDataList.toMutableList()
         call.respondBytesWriter(
-            contentType = ContentType.parse(shareInfo.contentType()).withCharset(Charsets.UTF_8),
+            contentType = ContentType.parse(name.parseFileMimeType()).withCharset(Charsets.UTF_8),
             contentLength = contentLength
         ) {
             val sortedTask = SortedTask(downloadTaskCount)
@@ -89,7 +93,7 @@ private suspend fun MixFileServer.responseDownloadFileStream(
                 tasks.add(async {
                     val (url, range) = currentFile
                     val dataBytes =
-                        shareInfo.fetchFile(url, httpClient, referer ?: shareInfo.referer)
+                        shareInfo.fetchFile(url, httpClient, referer)
                     sortedTask.addTask(taskOrder) {
                         val dataToWrite = when {
                             range == 0 -> dataBytes
