@@ -146,6 +146,13 @@ fun String.codePointOffset(index: Int): Int {
     return this.codePointCount(0, index)
 }
 
+fun String?.ifNullOrBlank(value: () -> String): String {
+    if (!this.isNullOrBlank()) {
+        return this
+    }
+    return value()
+}
+
 fun Int.toBytes(): ByteArray =
     ByteBuffer.allocate(Int.SIZE_BYTES).putInt(this).array()
 
