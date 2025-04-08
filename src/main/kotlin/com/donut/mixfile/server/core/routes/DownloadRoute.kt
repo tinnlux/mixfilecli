@@ -22,8 +22,9 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 @OptIn(ExperimentalEncodingApi::class)
 fun MixFileServer.getDownloadRoute(): RoutingHandler {
     return route@{
-        val shareInfoData = call.request.queryParameters["s"]
-        val referer = call.request.queryParameters["referer"]
+        val shareInfoData = call.parameters["s"]
+        val referer = call.parameters["referer"]
+        var name = call.parameters["name"]
         if (shareInfoData == null) {
             call.respondText("分享信息为空", status = HttpStatusCode.InternalServerError)
             return@route
@@ -41,12 +42,15 @@ fun MixFileServer.getDownloadRoute(): RoutingHandler {
             )
             return@route
         }
+        if (name.isNullOrEmpty()) {
+            name = shareInfo.fileName
+        }
         var contentLength = shareInfo.fileSize
         val range: LongRange? = call.request.ranges()?.mergeToSingle(contentLength)
         call.response.apply {
             header(
                 "Content-Disposition",
-                "inline; filename=\"${shareInfo.fileName.encodeURL()}\""
+                "inline; filename=\"${name.encodeURL()}\""
             )
         }
         var fileList = mixFile.fileList.map { it to 0 }
@@ -79,25 +83,17 @@ private suspend fun MixFileServer.responseDownloadFileStream(
             val sortedTask = SortedTask(downloadTaskCount)
             val tasks = mutableListOf<Deferred<Unit>>()
             while (!isClosedForWrite && fileList.isNotEmpty()) {
-                val currentMeta = fileList.removeAt(0)
+                val currentFile = fileList.removeAt(0)
                 val taskOrder = -fileList.size
                 sortedTask.prepareTask(taskOrder)
                 tasks.add(async {
-                    val url = currentMeta.first
+                    val (url, range) = currentFile
                     val dataBytes =
                         shareInfo.fetchFile(url, httpClient, referer ?: shareInfo.referer)
-                    val range = currentMeta.second
-                    if (dataBytes == null) {
-                        call.respondText(
-                            "下载失败",
-                            status = HttpStatusCode.InternalServerError
-                        )
-                        return@async
-                    }
                     sortedTask.addTask(taskOrder) {
                         val dataToWrite = when {
                             range == 0 -> dataBytes
-                            range < 0 -> dataBytes.copyOfRange(0, -range)
+                            range < 0 -> dataBytes.copyOfRange(0, -range) //一般无 < 0 的情况
                             else -> dataBytes.copyOfRange(range, dataBytes.size)
                         }
                         try {

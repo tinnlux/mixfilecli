@@ -43,7 +43,7 @@ fun getCipher(mode: Int, key: ByteArray, iv: ByteArray): Cipher {
     return cipher
 }
 
-suspend fun decryptAES(data: ByteReadChannel, key: ByteArray): ByteArray? {
+suspend fun decryptAES(data: ByteReadChannel, key: ByteArray): ByteArray {
     val iv = data.readRemaining(12).readByteArray()
     val cipher = getCipher(Cipher.DECRYPT_MODE, key, iv)
     val result = ByteArrayOutputStream()
