@@ -31,10 +31,12 @@ fun MixFileServer.getDownloadRoute(): RoutingHandler {
             call.respondText("解析文件失败", status = HttpStatusCode.InternalServerError)
             return@route
         }
-        val mixFile = shareInfo.fetchMixFile(httpClient)
-        if (mixFile == null) {
+
+        val mixFile = try {
+            shareInfo.fetchMixFile(httpClient)
+        } catch (e: Exception) {
             call.respondText(
-                "解析文件索引失败",
+                "解析文件索引失败: ${e.stackTraceToString()}",
                 status = HttpStatusCode.InternalServerError
             )
             return@route

@@ -59,9 +59,7 @@ private val encodeMap = run {
 fun MixShareInfo.shareCode(useShortCode: Boolean): String {
     if (useShortCode) {
         return "mf://${encodeHex(this.toString())}${
-            MixShareInfo.ENCODER.encode(
-                this.url.hashMD5().copyOf(6)
-            )
+            this.toString().substring(0, 8)
         }"
     }
     return "mf://$this"

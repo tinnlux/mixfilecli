@@ -99,10 +99,12 @@ abstract class MixFileServer(
             }
             install(StatusPages) {
                 exception<Throwable> { call, cause ->
-                    call.respondText(
-                        "发生错误: ${cause.message} ${cause.stackTraceToString()}",
-                        status = HttpStatusCode.InternalServerError
-                    )
+                    if (!call.response.isCommitted) {
+                        call.respondText(
+                            "发生错误: ${cause.message} ${cause.stackTraceToString()}",
+                            status = HttpStatusCode.InternalServerError
+                        )
+                    }
                     onError(cause)
                 }
             }
