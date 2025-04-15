@@ -4,12 +4,12 @@ val logback_version: String by project
 
 plugins {
     java // 确保应用了 Java 插件
-    kotlin("jvm") version "2.1.0"
+    kotlin("jvm") version "2.1.20"
     id("io.ktor.plugin") version "3.0.1"
 }
 
 group = "con.donut.mixfilecli"
-version = "1.7.2"
+version = "1.8.0"
 
 application {
     mainClass.set("com.donut.mixfilecli.ApplicationKt")
@@ -44,7 +44,7 @@ dependencies {
     implementation("com.michael-bull.kotlin-retry:kotlin-retry:2.0.1")
     val ktor_version = "3.1.1"
     implementation("io.ktor:ktor-client-core:$ktor_version")
-    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.10")
+    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.56")
     implementation("io.ktor:ktor-client-cio:$ktor_version")
     implementation("io.ktor:ktor-client-okhttp:$ktor_version")
     implementation("io.ktor:ktor-client-logging:$ktor_version")
@@ -60,7 +60,7 @@ dependencies {
     implementation("io.ktor:ktor-server-status-pages-jvm")
     implementation("io.ktor:ktor-server-cors-jvm")
     implementation("io.ktor:ktor-server-cio-jvm")
-    implementation("ch.qos.logback:logback-classic:$logback_version")
+    implementation("ch.qos.logback:logback-classic:1.5.13")
     implementation("io.ktor:ktor-server-config-yaml")
     implementation("com.github.amr:mimetypes:0.0.3")
     testImplementation("io.ktor:ktor-server-test-host-jvm")

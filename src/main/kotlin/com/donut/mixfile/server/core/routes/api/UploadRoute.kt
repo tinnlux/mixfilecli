@@ -1,4 +1,4 @@
-package com.donut.mixfile.server.core.routes
+package com.donut.mixfile.server.core.routes.api
 
 import com.donut.mixfile.server.core.MixFileServer
 import com.donut.mixfile.server.core.Uploader
@@ -20,58 +20,65 @@ import kotlin.math.ceil
 
 fun MixFileServer.getUploadRoute(): RoutingHandler {
     return route@{
-        val key = generateRandomByteArray(32)
         val name = call.parameters["name"]
         val add = call.parameters["add"] ?: "true"
         if (name.isNullOrEmpty()) {
             call.respondText("需要文件名称", status = HttpStatusCode.InternalServerError)
             return@route
         }
+
         val size = call.request.contentLength() ?: 0
-        if (size <= 0L) {
-            call.respondText("文件大小不合法", status = HttpStatusCode.InternalServerError)
-            return@route
-        }
-        val uploadTask = getUploadTask(call, name, size, add.toBoolean())
-        currentCoroutineContext().job.invokeOnCompletion {
-            uploadTask.error = it
-            uploadTask.stopped = true
-        }
-        val uploader = getUploader()
-        val head = uploader.genHead(httpClient) ?: genDefaultImage()
-        val mixUrl =
-            uploadFile(call.receiveChannel(), head, uploader, key, fileSize = size, uploadTask)
-        if (mixUrl == null) {
-            call.respondText("上传失败", status = HttpStatusCode.InternalServerError)
-            return@route
-        }
-        val mixShareInfo =
-            MixShareInfo(
-                fileName = name,
-                fileSize = size,
-                headSize = head.size,
-                url = mixUrl,
-                key = MixShareInfo.ENCODER.encode(key),
-                referer = uploader.referer
-            )
-        uploadTask.complete(mixShareInfo)
-        call.respondText(mixShareInfo.toString())
+
+        call.respondText(uploadFile(call.receiveChannel(), name, size, add.toBoolean()) {
+            call.respondText("上传已取消", status = HttpStatusCode.InternalServerError)
+        })
     }
 }
 
 suspend fun MixFileServer.uploadFile(
+    channel: ByteReadChannel,
+    name: String,
+    size: Long,
+    add: Boolean = true,
+    key: ByteArray = generateRandomByteArray(32),
+    onStop: suspend () -> Unit = {}
+): String {
+    val uploadTask = getUploadTask(name, size, add)
+    uploadTask.onStop.add(onStop)
+    currentCoroutineContext().job.invokeOnCompletion {
+        uploadTask.error = it
+        uploadTask.stopped = true
+    }
+    val uploader = getUploader()
+    val head = uploader.genHead(httpClient) ?: genDefaultImage()
+    val mixUrl =
+        doUploadFile(channel, head, uploader, key, fileSize = size, uploadTask)
+    val mixShareInfo =
+        MixShareInfo(
+            fileName = name,
+            fileSize = size,
+            headSize = head.size,
+            url = mixUrl,
+            key = MixShareInfo.ENCODER.encode(key),
+            referer = uploader.referer
+        )
+    uploadTask.complete(mixShareInfo)
+    return mixShareInfo.toString()
+}
+
+private suspend fun MixFileServer.doUploadFile(
     channel: ByteReadChannel,
     head: ByteArray,
     uploader: Uploader,
     secret: ByteArray,
     fileSize: Long,
     uploadTask: MixUploadTask,
-): String? {
+): String {
+
     val semaphore = Semaphore(uploadTaskCount)
     return coroutineScope {
-        val context = currentCoroutineContext()
-        uploadTask.onStop = {
-            context.cancel()
+        uploadTask.onStop.add(0) {
+            channel.cancel()
         }
         val chunkSize = uploader.chunkSize
         //固定大小string list
@@ -87,7 +94,7 @@ suspend fun MixFileServer.uploadFile(
             fileIndex++
             tasks.add(async {
                 try {
-                    val url = uploader.upload(head, fileData, secret, this@uploadFile)
+                    val url = uploader.upload(head, fileData, secret, this@doUploadFile)
                     fileList[currentIndex] = url
                     uploadTask.updateProgress(fileData.size.toLong(), fileSize)
                 } finally {
@@ -97,13 +104,13 @@ suspend fun MixFileServer.uploadFile(
         }
         tasks.awaitAll()
         if (fileList.any { it.isEmpty() }) {
-            return@coroutineScope null
+            throw Exception("上传失败")
         }
         val mixFile =
             MixFile(chunkSize = chunkSize, version = 0, fileList = fileList, fileSize = fileSize)
         val mixFileData = mixFile.toBytes()
         val mixFileUrl =
-            uploader.upload(head, mixFileData, secret, this@uploadFile)
+            uploader.upload(head, mixFileData, secret, this@doUploadFile)
         return@coroutineScope mixFileUrl
     }
 }

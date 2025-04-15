@@ -13,3 +13,4 @@ host: "0.0.0.0"
 custom_url: ""
 #自定义线路referer
 custom_referer: ""
+webdav_path: "data.mix_dav"

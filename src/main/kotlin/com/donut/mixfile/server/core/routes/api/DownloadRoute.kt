@@ -1,4 +1,4 @@
-package com.donut.mixfile.server.core.routes
+package com.donut.mixfile.server.core.routes.api
 
 import com.donut.mixfile.server.core.MixFileServer
 import com.donut.mixfile.server.core.httpClient
@@ -31,41 +31,46 @@ fun MixFileServer.getDownloadRoute(): RoutingHandler {
             call.respondText("解析文件失败", status = HttpStatusCode.InternalServerError)
             return@route
         }
-
-        val mixFile = try {
-            shareInfo.fetchMixFile(httpClient)
-        } catch (e: Exception) {
-            call.respondText(
-                "解析文件索引失败: ${e.stackTraceToString()}",
-                status = HttpStatusCode.InternalServerError
-            )
-            return@route
-        }
-
-        val referer = param["referer"].ifNullOrBlank { shareInfo.referer }
-
-        val name = param["name"].ifNullOrBlank { shareInfo.fileName }
-
-        var contentLength = shareInfo.fileSize
-        val range: LongRange? = call.request.ranges()?.mergeToSingle(contentLength)
-        call.response.apply {
-            header(
-                "Content-Disposition",
-                "inline; filename=\"${name.encodeURL()}\""
-            )
-        }
-        var fileList = mixFile.fileList.map { it to 0 }
-        if (range != null) {
-            fileList = mixFile.getFileListByStartRange(range.first)
-            call.response.apply {
-                header("Accept-Ranges", "bytes")
-                status(HttpStatusCode.PartialContent)
-                contentRange(range, mixFile.fileSize)
-            }
-            contentLength = mixFile.fileSize - range.first
-        }
-        responseDownloadFileStream(call, fileList, contentLength, shareInfo, referer, name)
+        respondMixFile(call, shareInfo)
     }
+}
+
+suspend fun MixFileServer.respondMixFile(call: ApplicationCall, shareInfo: MixShareInfo) {
+    val param = call.parameters
+    val mixFile = try {
+        shareInfo.fetchMixFile(httpClient)
+    } catch (e: Exception) {
+        call.respondText(
+            "解析文件索引失败: ${e.stackTraceToString()}",
+            status = HttpStatusCode.InternalServerError
+        )
+        return
+    }
+
+    val referer = param["referer"].ifNullOrBlank { shareInfo.referer }
+
+    val name = param["name"].ifNullOrBlank { shareInfo.fileName }
+
+    var contentLength = shareInfo.fileSize
+    val range: LongRange? = call.request.ranges()?.mergeToSingle(contentLength)
+    call.response.apply {
+        header(
+            "Content-Disposition",
+            "inline; filename=\"${name.encodeURL()}\""
+        )
+        header("x-mix-code", shareInfo.toString())
+    }
+    var fileList = mixFile.fileList.map { it to 0 }
+    if (range != null) {
+        fileList = mixFile.getFileListByStartRange(range.first)
+        call.response.apply {
+            header("Accept-Ranges", "bytes")
+            status(HttpStatusCode.PartialContent)
+            contentRange(range, mixFile.fileSize)
+        }
+        contentLength = mixFile.fileSize - range.first
+    }
+    responseDownloadFileStream(call, fileList, contentLength, shareInfo, referer, name)
 }
 
 private suspend fun MixFileServer.responseDownloadFileStream(

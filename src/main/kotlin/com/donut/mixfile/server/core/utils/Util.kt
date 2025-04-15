@@ -13,7 +13,6 @@ import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.net.MalformedURLException
 import java.net.URL
-import java.net.URLEncoder
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
@@ -119,7 +118,7 @@ fun decompressGzip(compressed: ByteArray): String {
 }
 
 fun String.encodeURL(): String {
-    return URLEncoder.encode(this, "UTF-8")
+    return encodeURLQueryComponent()
 }
 
 fun String.parseFileMimeType() = MimeTypes.getInstance()

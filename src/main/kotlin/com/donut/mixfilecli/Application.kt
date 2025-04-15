@@ -4,23 +4,23 @@ import com.alibaba.fastjson2.toJSONString
 import com.donut.mixfile.server.CustomUploader
 import com.donut.mixfile.server.core.MixFileServer
 import com.donut.mixfile.server.core.Uploader
+import com.donut.mixfile.server.core.routes.api.webdav.utils.WebDavManager
 import com.donut.mixfile.server.core.uploaders.A3Uploader
 import com.donut.mixfile.server.core.uploaders.hidden.A1Uploader
 import com.donut.mixfile.server.core.uploaders.hidden.A2Uploader
 import com.donut.mixfile.server.core.utils.MixUploadTask
 import com.donut.mixfile.server.core.utils.bean.MixShareInfo
-import com.donut.mixfile.server.core.utils.registerJson
 import com.donut.mixfile.util.file.toDataLog
 import com.donut.mixfile.util.file.uploadLogs
-import com.donut.mixfile.util.showError
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
-import io.ktor.server.application.*
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 import java.awt.Color
 import java.awt.image.BufferedImage
-import java.io.*
+import java.io.ByteArrayOutputStream
+import java.io.File
+import java.io.FileOutputStream
+import java.io.InputStream
 import java.util.*
 import javax.imageio.ImageIO
 import javax.imageio.stream.ImageOutputStream
@@ -35,6 +35,7 @@ data class Config(
     val customUrl: String = "",
     val customReferer: String = "",
     val host: String = "0.0.0.0",
+    val webdavPath: String = "data.mix_dav"
 )
 
 var config: Config = Config()
@@ -80,10 +81,9 @@ fun createRandomGifByteArray(): ByteArray {
     return byteArrayOutputStream.toByteArray()
 }
 
-@OptIn(ExperimentalHoplite::class, ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalHoplite::class)
 fun main(args: Array<String>) {
     checkConfig()
-    registerJson()
     config = ConfigLoaderBuilder.default()
         .addFileSource("config.yml")
         .withExplicitSealedTypes()
@@ -93,6 +93,19 @@ fun main(args: Array<String>) {
     val UPLOADERS = listOf(A1Uploader, A2Uploader, A3Uploader, CustomUploader)
 
     fun getCurrentUploader() = UPLOADERS.firstOrNull { it.name.contentEquals(config.uploader) } ?: A1Uploader
+    val webDavManager = object : WebDavManager() {
+        override suspend fun saveWebDavData(data: ByteArray) {
+            val file = File(config.webdavPath)
+            file.parentFile?.mkdirs()
+            file.writeBytes(data)
+        }
+    }
+
+    try {
+        webDavManager.loadDataFromBytes(File(config.webdavPath).readBytes())
+    } catch (_: Exception) {
+
+    }
 
     val server = object : MixFileServer(
         serverPort = config.port,
@@ -104,29 +117,33 @@ fun main(args: Array<String>) {
         override val requestRetryCount
             get() = config.uploadRetry
 
+        override val webDav: WebDavManager
+            get() = webDavManager
+
         override fun onError(error: Throwable) {
-            showError(error)
+            System.err.println(error.stackTraceToString())
         }
 
         override fun getUploader(): Uploader {
             return getCurrentUploader()
         }
 
-        override fun getStaticFile(path: String): InputStream? {
+        override suspend fun getStaticFile(path: String): InputStream? {
             val classLoader = object {}.javaClass.classLoader
             // 加载资源文件，路径相对于 resources 目录
             return classLoader?.getResourceAsStream("files/${path}")
         }
 
-        override fun genDefaultImage(): ByteArray {
+        override suspend fun genDefaultImage(): ByteArray {
             return createRandomGifByteArray()
         }
 
-        override fun getFileHistory(): String {
+        override suspend fun getFileHistory(): String {
             return uploadLogs.asReversed().toJSONString()
         }
 
-        override fun getUploadTask(call: ApplicationCall, name: String, size: Long, add: Boolean): MixUploadTask {
+
+        override fun getUploadTask(name: String, size: Long, add: Boolean): MixUploadTask {
             return object : MixUploadTask {
                 override var error: Throwable? = null
                 override var stopped: Boolean = false
@@ -137,7 +154,8 @@ fun main(args: Array<String>) {
                     }
                 }
 
-                override var onStop: () -> Unit = {}
+                override val onStop: MutableList<suspend () -> Unit> = mutableListOf()
+
 
                 override suspend fun updateProgress(size: Long, total: Long) {
 
@@ -146,7 +164,6 @@ fun main(args: Array<String>) {
         }
     }
     println("MixFile已在 ${config.host}:${server.serverPort} 启动")
-    System.setOut(PrintStream(OutputStream.nullOutputStream()))
     server.start(true)
 }
 
