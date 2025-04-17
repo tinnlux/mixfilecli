@@ -30,6 +30,7 @@ open class WebDavManager {
         val normalizedPath = normalizePath(path)
         val fileList = WEBDAV_DATA.getOrPut(normalizedPath) { HashSet() }
         synchronized(fileList) {
+            fileList.remove(file)
             fileList.add(file)
             WEBDAV_DATA[normalizedPath] = fileList
             if (file.isFolder) {
@@ -65,7 +66,6 @@ open class WebDavManager {
         )
         if (srcFile.isFolder) {
             val fileList = listFiles(path)
-            println("move list ${fileList.toJSONString()}")
             fileList?.forEach {
                 val filePath = "${normalizePath(path)}/${it.name}"
                 copyFile(filePath, "${normalizePath(dest)}/${it.name}", overwrite, keep)

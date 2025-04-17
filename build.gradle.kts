@@ -9,7 +9,7 @@ plugins {
 }
 
 group = "con.donut.mixfilecli"
-version = "1.8.0"
+version = "1.8.1"
 
 application {
     mainClass.set("com.donut.mixfilecli.ApplicationKt")

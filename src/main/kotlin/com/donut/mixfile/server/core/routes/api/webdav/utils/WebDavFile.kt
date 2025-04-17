@@ -1,5 +1,6 @@
 package com.donut.mixfile.server.core.routes.api.webdav.utils
 
+import com.alibaba.fastjson2.annotation.JSONField
 import com.donut.mixfile.server.core.utils.hashSHA256
 import com.donut.mixfile.server.core.utils.parseFileMimeType
 import com.donut.mixfile.server.core.utils.toHex
@@ -22,6 +23,7 @@ class WebDavFile(
         return name.contentEquals(other.name)
     }
 
+    @JSONField(serialize = false)
     fun getLastModifiedFormatted(): String {
         val sdf = SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss 'GMT'", Locale.US)
         sdf.timeZone = TimeZone.getTimeZone("GMT")
@@ -32,59 +34,57 @@ class WebDavFile(
     override fun hashCode(): Int = name.hashCode()
     fun toXML(path: String): String {
         if (isFolder) {
-            return xml("d:response") {
-                "d:href" {
-                    -"${normalizePath(path)}/${name}"
+            return xml("D:response") {
+                "D:href" {
+                    -"/${normalizePath("$path/$name")}/"
                 }
-                "d:propstat" {
-                    "d:prop" {
-                        "d:displayname" {
-                            -name
+                "D:propstat" {
+                    "D:prop" {
+                        "D:displayname" {
+                            -name.ifEmpty { "root" }
                         }
-                        "d:resourcetype" {
-                            "d:collection" {
+                        "D:resourcetype" {
+                            "D:collection" {
 
                             }
                         }
-                        "d:getcontenttype" {
 
-                        }
-                        "d:getlastmodified" {
+                        "D:getlastmodified" {
                             -getLastModifiedFormatted()
                         }
                     }
-                    "d:status" {
+                    "D:status" {
                         -"HTTP/1.1 200 OK"
                     }
                 }
             }.toString()
         }
-        return xml("d:response") {
-            "d:href" {
-                -"${normalizePath(path)}/${name}"
+        return xml("D:response") {
+            "D:href" {
+                -"/${normalizePath(path)}/${name}"
             }
-            "d:propstat" {
-                "d:prop" {
-                    "d:displayname" {
+            "D:propstat" {
+                "D:prop" {
+                    "D:displayname" {
                         -name
                     }
-                    "d:resourcetype" {
+                    "D:resourcetype" {
 
                     }
-                    "d:getcontenttype" {
+                    "D:getcontenttype" {
                         -name.parseFileMimeType()
                     }
-                    "d:getcontentlength" {
+                    "D:getcontentlength" {
                         -size.toString()
                     }
-                    "d:getetag" {
+                    "D:getetag" {
                         -shareInfoData.hashSHA256().toHex()
                     }
-                    "d:getlastmodified" {
+                    "D:getlastmodified" {
                         -getLastModifiedFormatted()
                     }
                 }
-                "d:status" {
+                "D:status" {
                     -"HTTP/1.1 200 OK"
                 }
             }
