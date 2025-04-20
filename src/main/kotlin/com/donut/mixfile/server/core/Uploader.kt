@@ -3,10 +3,7 @@ package com.donut.mixfile.server.core
 import com.donut.mixfile.server.core.aes.encryptAES
 import com.donut.mixfile.server.core.utils.bean.hashMixSHA256
 import com.donut.mixfile.server.core.utils.isValidURL
-import com.github.michaelbull.retry.policy.constantDelay
-import com.github.michaelbull.retry.policy.plus
-import com.github.michaelbull.retry.policy.stopAtAttempts
-import com.github.michaelbull.retry.retry
+import com.donut.mixfile.server.core.utils.retry
 import io.ktor.client.*
 
 abstract class Uploader(val name: String) {
@@ -50,9 +47,8 @@ abstract class Uploader(val name: String) {
         key: ByteArray,
         mixFileServer: MixFileServer
     ): String {
-        val policy =
-            constantDelay<Throwable>(delayMillis = 100L) + stopAtAttempts(mixFileServer.requestRetryCount)
-        return retry(policy) {
+
+        return retry(times = mixFileServer.requestRetryCount, delay = 100) {
             val encryptedData = encryptBytes(head, fileData, key)
             try {
                 val url = doUpload(

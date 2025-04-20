@@ -15,6 +15,7 @@ import com.donut.mixfile.util.file.uploadLogs
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
+import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.awt.image.BufferedImage
 import java.io.ByteArrayOutputStream
@@ -27,7 +28,7 @@ import javax.imageio.stream.ImageOutputStream
 import javax.imageio.stream.MemoryCacheImageOutputStream
 
 data class Config(
-    val uploader: String = "A1",
+    val uploader: String = "线路A1",
     val uploadTask: Int = 10,
     val downloadTask: Int = 5,
     val port: Int = 4719,
@@ -35,6 +36,7 @@ data class Config(
     val customUrl: String = "",
     val customReferer: String = "",
     val host: String = "0.0.0.0",
+    val password: String = "",
     val webdavPath: String = "data.mix_dav"
 )
 
@@ -119,6 +121,9 @@ fun main(args: Array<String>) {
         override val requestRetryCount
             get() = config.uploadRetry
 
+        override val password: String
+            get() = config.password
+
         override val webDav: WebDavManager
             get() = webDavManager
 
@@ -165,7 +170,8 @@ fun main(args: Array<String>) {
             }
         }
     }
-    println("MixFile已在 ${config.host}:${server.serverPort} 启动")
+    val logger = LoggerFactory.getLogger("io.ktor.server.Application")
+    logger.info("MixFile已在 ${config.host}:${server.serverPort} 启动  线路: ${server.getUploader().name}")
     server.start(true)
 }
 

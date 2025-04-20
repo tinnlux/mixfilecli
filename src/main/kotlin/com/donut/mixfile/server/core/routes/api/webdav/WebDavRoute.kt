@@ -1,11 +1,14 @@
 package com.donut.mixfile.server.core.routes.api.webdav
 
 import com.donut.mixfile.server.core.MixFileServer
+import com.donut.mixfile.server.core.interceptCall
 import com.donut.mixfile.server.core.routes.api.respondMixFile
 import com.donut.mixfile.server.core.routes.api.uploadFile
 import com.donut.mixfile.server.core.routes.api.webdav.utils.WebDavFile
 import com.donut.mixfile.server.core.routes.api.webdav.utils.WebDavManager
 import com.donut.mixfile.server.core.routes.api.webdav.utils.normalizePath
+import com.donut.mixfile.server.core.routes.api.webdav.utils.toDavPath
+import com.donut.mixfile.server.core.utils.getHeader
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import io.ktor.http.*
 import io.ktor.server.request.*
@@ -28,11 +31,12 @@ val RoutingContext.davParentPath: String
 val RoutingContext.davFileName: String
     get() = davPath.substringAfterLast("/")
 
+
 suspend fun RoutingContext.handleCopy(keep: Boolean, webDavManager: WebDavManager) {
-    val overwrite = call.request.header("overwrite").contentEquals("T")
-    val destination = call.request.header("destination")?.decodeURLQueryComponent().let {
+    val overwrite = getHeader("overwrite").contentEquals("T")
+    val destination = getHeader("destination")?.decodeURLQueryComponent().let {
         it?.substringAfter("/api/webdav/")
-    }.let { normalizePath(it ?: "") }
+    }.toDavPath()
     if (destination.isBlank()) {
         call.respond(HttpStatusCode.BadRequest)
         return
@@ -48,6 +52,11 @@ suspend fun RoutingContext.handleCopy(keep: Boolean, webDavManager: WebDavManage
 
 fun MixFileServer.getWebDAVRoute(): Route.() -> Unit {
     return {
+        interceptCall({
+            if (!webDav.loaded) {
+                it.respond(HttpStatusCode.ServiceUnavailable, "WebDav is Loading")
+            }
+        })
         webdav("OPTIONS") {
             call.response.apply {
                 header("Allow", "OPTIONS, DELETE, COPY, MOVE, PROPFIND")
@@ -106,7 +115,7 @@ fun MixFileServer.getWebDAVRoute(): Route.() -> Unit {
             webDav.saveData()
         }
         propfind {
-            val depth = call.request.header("depth")?.toInt() ?: 0
+            val depth = getHeader("depth")?.toInt() ?: 0
             if (depth == 0) {
                 val file = webDav.getFile(davPath)
                 if (file == null) {

@@ -19,9 +19,10 @@ fun MixFileServer.getRoutes(): Routing.() -> Unit {
             val file = call.request.path().substring(1).ifEmpty {
                 "index.html"
             }
-            val fileStream = getStaticFile(file) ?: return@get call.respond(HttpStatusCode.NotFound)
+            val fileStream =
+                getStaticFile(file) ?: return@get call.respond(HttpStatusCode.NotFound)
             call.respondBytesWriter(
-                contentType = ContentType.parse(file.parseFileMimeType())
+                contentType = file.parseFileMimeType()
             ) {
                 fileStream.toByteReadChannel().copyTo(this)
             }

@@ -3,7 +3,6 @@ package com.donut.mixfile.server.core.routes.api
 import com.donut.mixfile.server.core.MixFileServer
 import com.donut.mixfile.server.core.Uploader
 import com.donut.mixfile.server.core.aes.generateRandomByteArray
-import com.donut.mixfile.server.core.httpClient
 import com.donut.mixfile.server.core.utils.MixUploadTask
 import com.donut.mixfile.server.core.utils.bean.MixFile
 import com.donut.mixfile.server.core.utils.bean.MixShareInfo

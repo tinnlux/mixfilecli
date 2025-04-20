@@ -118,7 +118,7 @@ data class MixShareInfo(
         return false
     }
 
-    fun contentType(): String = fileName.parseFileMimeType()
+    fun contentType(): String = fileName.parseFileMimeType().toString()
 
     suspend fun fetchMixFile(client: HttpClient): MixFile {
         val decryptedBytes = fetchFile(url, client = client)
