@@ -3,18 +3,27 @@ package com.donut.mixfile.server.core.routes.api.webdav.utils
 import com.alibaba.fastjson2.annotation.JSONField
 import com.donut.mixfile.server.core.utils.hashSHA256
 import com.donut.mixfile.server.core.utils.parseFileMimeType
+import com.donut.mixfile.server.core.utils.sanitizeWebDavFileName
 import com.donut.mixfile.server.core.utils.toHex
+import io.ktor.http.*
 import java.text.SimpleDateFormat
 import java.util.*
 
 // WebDAV 文件类，包含额外属性
 class WebDavFile(
-    val name: String,
+    var name: String,
     val size: Long = 0,
     val shareInfoData: String = "",
     val isFolder: Boolean = false,
     var lastModified: Long = System.currentTimeMillis()
 ) {
+
+    init {
+        if (name.isNotEmpty()) {
+            name = name.sanitizeWebDavFileName().decodeURLQueryComponent()
+        }
+
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -36,7 +45,7 @@ class WebDavFile(
         if (isFolder) {
             return xml("D:response") {
                 "D:href" {
-                    -"/${normalizePath("$path/$name")}/"
+                    -"/${normalizePath("$path/$name")}/".encodeURLPath(encodeEncoded = true)
                 }
                 "D:propstat" {
                     "D:prop" {
@@ -61,7 +70,7 @@ class WebDavFile(
         }
         return xml("D:response") {
             "D:href" {
-                -"/${normalizePath(path)}/${name}"
+                -"/${normalizePath(path)}/${name}".encodeURLPath(encodeEncoded = true)
             }
             "D:propstat" {
                 "D:prop" {

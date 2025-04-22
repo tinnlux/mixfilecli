@@ -7,6 +7,7 @@ data class FileDataLog(
     val name: String,
     val size: Long,
     val time: Date = Date(),
+    val category: String = "默认",
 ) {
 
     override fun hashCode(): Int {

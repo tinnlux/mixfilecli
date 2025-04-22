@@ -8,8 +8,10 @@ import com.donut.mixfile.server.core.routes.api.webdav.utils.WebDavFile
 import com.donut.mixfile.server.core.routes.api.webdav.utils.WebDavManager
 import com.donut.mixfile.server.core.routes.api.webdav.utils.normalizePath
 import com.donut.mixfile.server.core.routes.api.webdav.utils.toDavPath
+import com.donut.mixfile.server.core.utils.bean.MixShareInfo
 import com.donut.mixfile.server.core.utils.getHeader
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
+import com.donut.mixfile.server.core.utils.sanitizeWebDavFileName
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -19,23 +21,29 @@ import io.ktor.server.routing.RoutingHandler
 import io.ktor.server.routing.method
 import io.ktor.server.routing.route
 
+const val API_PATH = "/api/webdav"
 
 val RoutingContext.davPath: String
-    get() = normalizePath(
-        (call.parameters.getAll("path") ?: emptyList()).joinToString("/")
-    )
+    get() = normalizePath(call.request.path().substringAfter(API_PATH))
 
 val RoutingContext.davParentPath: String
     get() = davPath.substringBeforeLast("/", "")
 
 val RoutingContext.davFileName: String
-    get() = davPath.substringAfterLast("/")
+    get() = davPath.substringAfterLast("/").sanitizeWebDavFileName()
+
+val RoutingContext.davShareInfo: MixShareInfo?
+    get() = resolveMixShareInfo(
+        davPath.substringAfterLast(
+            "/"
+        )
+    )
 
 
 suspend fun RoutingContext.handleCopy(keep: Boolean, webDavManager: WebDavManager) {
     val overwrite = getHeader("overwrite").contentEquals("T")
     val destination = getHeader("destination")?.decodeURLQueryComponent().let {
-        it?.substringAfter("/api/webdav/")
+        it?.substringAfter(API_PATH)
     }.toDavPath()
     if (destination.isBlank()) {
         call.respond(HttpStatusCode.BadRequest)
@@ -109,6 +117,18 @@ fun MixFileServer.getWebDAVRoute(): Route.() -> Unit {
                 call.respond(HttpStatusCode.Conflict)
                 return@webdav
             }
+            val shareInfo = davShareInfo
+            if (shareInfo != null) {
+                val node = WebDavFile(
+                    name = shareInfo.fileName,
+                    size = shareInfo.fileSize,
+                    shareInfoData = shareInfo.toString()
+                )
+                webDav.addFileNode(davParentPath, node)
+                call.respond(HttpStatusCode.Created)
+                webDav.saveData()
+                return@webdav
+            }
             val node = WebDavFile(isFolder = true, name = davFileName)
             webDav.addFileNode(davParentPath, node)
             call.respond(HttpStatusCode.Created)
@@ -142,7 +162,7 @@ fun MixFileServer.getWebDAVRoute(): Route.() -> Unit {
             val xmlFileList = fileList.toMutableList().apply {
                 add(0, WebDavFile(davParentPath.substringAfterLast("/"), isFolder = true))
             }.joinToString(separator = "") {
-                it.toXML(call.request.uri)
+                it.toXML(normalizePath(call.request.uri))
             }
             val text = """
                 <D:multistatus xmlns:D="DAV:">

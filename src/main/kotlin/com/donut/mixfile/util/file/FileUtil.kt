@@ -14,6 +14,7 @@ fun MixShareInfo.toDataLog(): FileDataLog {
 }
 
 var uploadLogs = listOf<FileDataLog>()
+
 fun addUploadLog(shareInfo: MixShareInfo) {
     val uploadLog = shareInfo.toDataLog()
     if (uploadLogs.size > 1000) {

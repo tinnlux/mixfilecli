@@ -16,35 +16,48 @@ import kotlinx.coroutines.launch
 import java.io.ByteArrayInputStream
 import java.io.ByteArrayOutputStream
 import java.io.InputStream
-import java.net.MalformedURLException
 import java.net.ServerSocket
-import java.net.URL
+import java.net.URI
 import java.util.concurrent.CopyOnWriteArrayList
 import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
+import kotlin.random.Random
 
 fun String.getFileExtension(): String {
     val index = this.lastIndexOf('.')
     return if (index == -1) "" else this.substring(index + 1).lowercase()
 }
 
+fun String.sanitizeWebDavFileName(): String {
+    val illegalChars = "[/\\\\:*?\"<>|%&#@]".toRegex()
+
+
+    return this
+        .replace(illegalChars, " ")
+        .trim()
+        .replace("\\s+".toRegex(), "_")
+        .takeLast(255)
+        .ifEmpty { "unnamed_file" }
+}
+
+
 fun genRandomString(
     length: Int = 32,
     charPool: List<Char> = ('a'..'z') + ('A'..'Z') + ('0'..'9')
 ): String {
     return (1..length)
-        .map { kotlin.random.Random.nextInt(0, charPool.size) }
+        .map { Random.nextInt(0, charPool.size) }
         .map(charPool::get)
         .joinToString("")
 }
 
 fun isValidURL(urlString: String): Boolean {
     return try {
-        val url = URL(urlString)
+        val uri = URI.create(urlString)
 
         // 获取协议和主机名
-        val protocol = url.protocol
-        val host = url.host
+        val protocol = uri.scheme
+        val host = uri.host
 
         // 检查协议和主机名是否为空
         if (protocol.isNullOrBlank() || host.isNullOrBlank()) {
@@ -52,8 +65,8 @@ fun isValidURL(urlString: String): Boolean {
         }
 
         // 可选：限制协议类型
-        protocol in listOf("http", "https", "ftp")
-    } catch (e: MalformedURLException) {
+        protocol in listOf("http", "https")
+    } catch (e: IllegalArgumentException) {
         false
     }
 }

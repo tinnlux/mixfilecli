@@ -16,3 +16,4 @@ custom_referer: ""
 webdav_path: "data.mix_dav"
 # 密码 留空为取消密码
 password: ""
+history: "history.mix_list"

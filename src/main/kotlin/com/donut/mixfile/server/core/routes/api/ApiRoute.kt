@@ -4,8 +4,6 @@ import com.alibaba.fastjson2.toJSONString
 import com.donut.mixfile.server.core.MixFileServer
 import com.donut.mixfile.server.core.mixBasicAuth
 import com.donut.mixfile.server.core.routes.api.webdav.getWebDAVRoute
-import com.donut.mixfile.server.core.utils.getHeader
-import com.donut.mixfile.server.core.utils.isNotNull
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
 import io.ktor.http.*
 import io.ktor.server.response.*
@@ -22,9 +20,6 @@ fun MixFileServer.getAPIRoute(): Route.() -> Unit {
         put("/upload/{name?}", getUploadRoute())
 
         get("/upload_history") {
-            if (getHeader("origin").isNotNull()) {
-                return@get call.respondText("此接口禁止跨域", status = HttpStatusCode.Forbidden)
-            }
             call.respond(getFileHistory())
         }
 

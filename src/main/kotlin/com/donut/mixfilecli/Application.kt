@@ -1,5 +1,6 @@
 package com.donut.mixfilecli
 
+import com.alibaba.fastjson2.into
 import com.alibaba.fastjson2.toJSONString
 import com.donut.mixfile.server.CustomUploader
 import com.donut.mixfile.server.core.MixFileServer
@@ -10,7 +11,9 @@ import com.donut.mixfile.server.core.uploaders.hidden.A1Uploader
 import com.donut.mixfile.server.core.uploaders.hidden.A2Uploader
 import com.donut.mixfile.server.core.utils.MixUploadTask
 import com.donut.mixfile.server.core.utils.bean.MixShareInfo
-import com.donut.mixfile.util.file.toDataLog
+import com.donut.mixfile.server.core.utils.compressGzip
+import com.donut.mixfile.server.core.utils.decompressGzip
+import com.donut.mixfile.util.file.addUploadLog
 import com.donut.mixfile.util.file.uploadLogs
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
@@ -37,7 +40,8 @@ data class Config(
     val customReferer: String = "",
     val host: String = "0.0.0.0",
     val password: String = "",
-    val webdavPath: String = "data.mix_dav"
+    val webdavPath: String = "data.mix_dav",
+    val history: String = "history.mix_list"
 )
 
 var config: Config = Config()
@@ -105,6 +109,7 @@ fun main(args: Array<String>) {
 
     try {
         webDavManager.loadDataFromBytes(File(config.webdavPath).readBytes())
+        uploadLogs = decompressGzip(File(config.history).readBytes()).into()
     } catch (_: Exception) {
 
     }
@@ -157,7 +162,10 @@ fun main(args: Array<String>) {
 
                 override suspend fun complete(shareInfo: MixShareInfo) {
                     if (add) {
-                        uploadLogs += shareInfo.toDataLog()
+                        addUploadLog(shareInfo)
+                        val file = File(config.history)
+                        file.parentFile?.mkdirs()
+                        file.writeBytes(compressGzip(uploadLogs.toJSONString()))
                     }
                 }
 
