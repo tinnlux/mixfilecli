@@ -50,7 +50,7 @@ class WebDavFile(
                 "D:propstat" {
                     "D:prop" {
                         "D:displayname" {
-                            -name.ifEmpty { "root" }
+                            -name.ifEmpty { "root" }.encodeURLParameter()
                         }
                         "D:resourcetype" {
                             "D:collection" {
@@ -75,7 +75,7 @@ class WebDavFile(
             "D:propstat" {
                 "D:prop" {
                     "D:displayname" {
-                        -name
+                        -name.encodeURLParameter()
                     }
                     "D:resourcetype" {
 

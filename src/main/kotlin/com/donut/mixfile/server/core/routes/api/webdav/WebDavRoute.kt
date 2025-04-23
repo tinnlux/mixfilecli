@@ -23,8 +23,10 @@ import io.ktor.server.routing.route
 
 const val API_PATH = "/api/webdav"
 
+val RoutingContext.decodedPath: String get() = call.request.path().decodeURLQueryComponent()
+
 val RoutingContext.davPath: String
-    get() = normalizePath(call.request.path().substringAfter(API_PATH))
+    get() = normalizePath(decodedPath.substringAfter(API_PATH))
 
 val RoutingContext.davParentPath: String
     get() = davPath.substringBeforeLast("/", "")
@@ -144,7 +146,7 @@ fun MixFileServer.getWebDAVRoute(): Route.() -> Unit {
                 }
                 val text = """
                 <D:multistatus xmlns:D="DAV:">
-                ${file.toXML(call.request.uri)}
+                ${file.toXML(decodedPath)}
                 </D:multistatus>
                 """
                 call.respondText(
@@ -162,7 +164,7 @@ fun MixFileServer.getWebDAVRoute(): Route.() -> Unit {
             val xmlFileList = fileList.toMutableList().apply {
                 add(0, WebDavFile(davParentPath.substringAfterLast("/"), isFolder = true))
             }.joinToString(separator = "") {
-                it.toXML(normalizePath(call.request.uri))
+                it.toXML(decodedPath)
             }
             val text = """
                 <D:multistatus xmlns:D="DAV:">

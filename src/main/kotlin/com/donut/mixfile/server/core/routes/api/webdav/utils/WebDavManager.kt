@@ -5,18 +5,8 @@ import com.alibaba.fastjson2.toJSONString
 import com.donut.mixfile.server.core.utils.compressGzip
 import com.donut.mixfile.server.core.utils.decompressGzip
 import com.donut.mixfile.server.core.utils.resolveMixShareInfo
-import io.ktor.http.*
-import java.net.URI
 import java.util.concurrent.ConcurrentHashMap
-import kotlin.collections.HashSet
-import kotlin.collections.List
-import kotlin.collections.MutableSet
-import kotlin.collections.emptyList
-import kotlin.collections.firstOrNull
-import kotlin.collections.forEach
-import kotlin.collections.getOrPut
 import kotlin.collections.set
-import kotlin.collections.toList
 
 
 open class WebDavManager {
@@ -159,16 +149,7 @@ fun String?.toDavPath() = normalizePath(this ?: "")
 
 fun normalizePath(path: String): String {
     if (path.isBlank()) return ""
-    val encoded = path.encodeURLPath()
-    val uri = try {
-        URI(encoded)
-    } catch (_: Exception) {
-        URI("http://dummyhost/${encoded}").also { uri ->
-            if (uri.path == null) return ""
-        }
-    }
-    val cleanPath = uri.path ?: return ""
-    return cleanPath.trim('/').replace(Regex("/+"), "/").decodeURLQueryComponent()
+    return path.trim('/').replace(Regex("/+"), "/")
 }
 
 
