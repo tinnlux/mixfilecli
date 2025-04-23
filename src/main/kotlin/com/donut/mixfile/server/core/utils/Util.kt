@@ -29,7 +29,7 @@ fun String.getFileExtension(): String {
 }
 
 fun String.sanitizeWebDavFileName(): String {
-    val illegalChars = "[/\\\\:*?\"<>%]".toRegex()
+    val illegalChars = "[/\\\\:*?\"<>|%]".toRegex()
 
 
     return this
