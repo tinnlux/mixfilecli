@@ -35,7 +35,6 @@ fun String.sanitizeWebDavFileName(): String {
     return this
         .replace(illegalChars, " ")
         .trim()
-        .replace("\\s+".toRegex(), "_")
         .takeLast(255)
         .ifEmpty { "unnamed_file" }
 }

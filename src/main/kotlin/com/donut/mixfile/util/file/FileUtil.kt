@@ -1,17 +1,9 @@
 package com.donut.mixfile.util.file
 
 
+import com.donut.mixfile.server.core.utils.bean.FileDataLog
 import com.donut.mixfile.server.core.utils.bean.MixShareInfo
-import com.donut.mixfile.util.FileDataLog
 
-
-fun MixShareInfo.toDataLog(): FileDataLog {
-    return FileDataLog(
-        shareInfoData = this.toString(),
-        name = this.fileName,
-        size = this.fileSize
-    )
-}
 
 var uploadLogs = listOf<FileDataLog>()
 

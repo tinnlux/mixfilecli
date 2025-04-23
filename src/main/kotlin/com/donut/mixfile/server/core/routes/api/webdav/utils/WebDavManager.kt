@@ -15,7 +15,6 @@ import kotlin.collections.emptyList
 import kotlin.collections.firstOrNull
 import kotlin.collections.forEach
 import kotlin.collections.getOrPut
-import kotlin.collections.joinToString
 import kotlin.collections.set
 import kotlin.collections.toList
 
@@ -95,7 +94,6 @@ open class WebDavManager {
         val parentPath = normalizedPath.substringBeforeLast('/', "")
         val name = normalizedPath.substringAfterLast('/')
         val fileList = WEBDAV_DATA[parentPath] ?: return
-        println("remove ${name} ${fileList.joinToString { it.name }}")
         synchronized(fileList) {
             val node = fileList.firstOrNull { it.name.contentEquals(name) }
             if (node != null) {
@@ -161,15 +159,16 @@ fun String?.toDavPath() = normalizePath(this ?: "")
 
 fun normalizePath(path: String): String {
     if (path.isBlank()) return ""
+    val encoded = path.encodeURLPath()
     val uri = try {
-        URI(path)
+        URI(encoded)
     } catch (_: Exception) {
-        URI("http://dummyhost/${path.encodeURLPath()}").also { uri ->
+        URI("http://dummyhost/${encoded}").also { uri ->
             if (uri.path == null) return ""
         }
     }
     val cleanPath = uri.path ?: return ""
-    return cleanPath.trim('/').replace(Regex("/+"), "/")
+    return cleanPath.trim('/').replace(Regex("/+"), "/").decodeURLQueryComponent()
 }
 
 
