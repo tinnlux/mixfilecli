@@ -13,7 +13,8 @@ open class WebDavManager {
     var WEBDAV_DATA = ConcurrentHashMap<String, MutableSet<WebDavFile>>()
     var loaded = true
 
-    fun dataToBytes() = compressGzip(WEBDAV_DATA.toJSONString())
+    fun dataToBytes(data: ConcurrentHashMap<String, MutableSet<WebDavFile>> = WEBDAV_DATA) =
+        compressGzip(data.toJSONString())
 
     fun loadDataFromBytes(data: ByteArray) {
         WEBDAV_DATA = parseDataFromBytes(data)
@@ -124,6 +125,23 @@ open class WebDavManager {
             return emptyList()
         }
         return result?.toList()
+    }
+
+    fun listFilesRecursive(path: String): ConcurrentHashMap<String, MutableSet<WebDavFile>> {
+        val normalizedPath = normalizePath(path)
+        val result = ConcurrentHashMap<String, MutableSet<WebDavFile>>()
+        fun addFolder(path: String) {
+            val folderList =
+                WEBDAV_DATA.getOrDefault(normalizePath("$normalizedPath/$path"), mutableSetOf())
+            result[path] = folderList
+            folderList.forEach {
+                if (it.isFolder) {
+                    addFolder(normalizePath("$path/${it.name}"))
+                }
+            }
+        }
+        addFolder("")
+        return result
     }
 
 
