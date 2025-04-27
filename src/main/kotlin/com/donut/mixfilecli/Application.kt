@@ -18,6 +18,7 @@ import com.donut.mixfile.util.file.uploadLogs
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
+import io.ktor.util.cio.*
 import io.ktor.utils.io.*
 import org.slf4j.LoggerFactory
 import java.awt.Color
@@ -138,6 +139,7 @@ fun main(args: Array<String>) {
             when (error) {
                 is ClosedWriteChannelException -> return
                 is ClosedByteChannelException -> return
+                is ChannelWriteException -> return
             }
 
             logger.error(error.stackTraceToString())
