@@ -1,9 +1,9 @@
 package com.donut.mixfile.server.core
 
 
-import com.donut.mixfile.server.core.routes.api.webdav.utils.WebDavManager
+import com.donut.mixfile.server.core.objects.MixShareInfo
+import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavManager
 import com.donut.mixfile.server.core.utils.MixUploadTask
-import com.donut.mixfile.server.core.utils.bean.MixShareInfo
 import com.donut.mixfile.server.core.utils.findAvailablePort
 import io.ktor.server.application.*
 import io.ktor.server.engine.*

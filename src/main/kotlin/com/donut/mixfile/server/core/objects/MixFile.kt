@@ -1,4 +1,4 @@
-package com.donut.mixfile.server.core.utils.bean
+package com.donut.mixfile.server.core.objects
 
 
 import com.alibaba.fastjson2.annotation.JSONField
@@ -13,7 +13,7 @@ fun ByteArray.hashMixSHA256() = MixShareInfo.ENCODER.encode(hashSHA256())
 
 
 data class MixFile(
-    @JSONField(name = "chunk_size") val chunkSize: Long,
+    @JSONField(name = "chunk_size") val chunkSize: Int,
     @JSONField(name = "file_size") val fileSize: Long,
     @JSONField(name = "version") val version: Long,
     @JSONField(name = "file_list") val fileList: List<String>,

@@ -3,18 +3,15 @@ package com.donut.mixfile.server.core.routes.api.webdav
 import com.alibaba.fastjson2.into
 import com.donut.mixfile.server.core.MixFileServer
 import com.donut.mixfile.server.core.interceptCall
+import com.donut.mixfile.server.core.objects.FileDataLog
+import com.donut.mixfile.server.core.objects.MixShareInfo
 import com.donut.mixfile.server.core.routes.api.respondMixFile
 import com.donut.mixfile.server.core.routes.api.uploadFile
-import com.donut.mixfile.server.core.routes.api.webdav.utils.WebDavFile
-import com.donut.mixfile.server.core.routes.api.webdav.utils.WebDavManager
-import com.donut.mixfile.server.core.routes.api.webdav.utils.normalizePath
-import com.donut.mixfile.server.core.routes.api.webdav.utils.toDavPath
-import com.donut.mixfile.server.core.utils.bean.FileDataLog
-import com.donut.mixfile.server.core.utils.bean.MixShareInfo
-import com.donut.mixfile.server.core.utils.decompressGzip
-import com.donut.mixfile.server.core.utils.getHeader
-import com.donut.mixfile.server.core.utils.resolveMixShareInfo
-import com.donut.mixfile.server.core.utils.sanitizeWebDavFileName
+import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavFile
+import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavManager
+import com.donut.mixfile.server.core.routes.api.webdav.objects.normalizePath
+import com.donut.mixfile.server.core.routes.api.webdav.objects.toDavPath
+import com.donut.mixfile.server.core.utils.*
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -40,10 +37,10 @@ val RoutingContext.davParentPath: String
     get() = davPath.substringBeforeLast("/", "")
 
 val RoutingContext.davFileName: String
-    get() = davPath.substringAfterLast("/").sanitizeWebDavFileName()
+    get() = davPath.substringAfterLast("/").sanitizeFileName()
 
-suspend fun RoutingContext.receiveBytes(limit: Long) =
-    call.receiveChannel().readRemaining(limit).readByteArray()
+suspend fun RoutingContext.receiveBytes(limit: Int) =
+    call.receiveChannel().readRemaining(limit.toLong()).readByteArray()
 
 val RoutingContext.davShareInfo: MixShareInfo?
     get() = resolveMixShareInfo(
@@ -123,21 +120,17 @@ fun MixFileServer.getWebDAVRoute(): Route.() -> Unit {
         }
         webdav("PUT") {
             val fileSize = call.request.contentLength() ?: 0
-            if (fileSize < 1024 * 1024 * 50 && fileSize > 0) {
+            if (fileSize < 50.mb && fileSize > 0) {
                 if (davFileName.endsWith(".mix_dav")) {
                     val davFileList =
-                        webDav.parseDataFromBytes(receiveBytes(1024 * 1024 * 50))
+                        webDav.parseDataFromBytes(receiveBytes(50.mb))
                     davFileList.forEach { (s, webDavFiles) ->
                         val path = normalizePath(s)
                         val newPath = normalizePath("${davParentPath}/${path}")
-                        webDav.addFileNode(
-                            newPath,
-                            WebDavFile(path.substringAfterLast("/", ""), isFolder = true)
-                        )
                         val fileList = webDav.WEBDAV_DATA.getOrDefault(newPath, HashSet())
                         fileList.removeAll(webDavFiles)
                         fileList.addAll(webDavFiles)
-                        webDav.WEBDAV_DATA[newPath] = webDavFiles
+                        webDav.WEBDAV_DATA[newPath] = fileList
                     }
                     call.respond(HttpStatusCode.Created)
                     webDav.saveData()
@@ -145,7 +138,7 @@ fun MixFileServer.getWebDAVRoute(): Route.() -> Unit {
                 }
                 if (davFileName.endsWith(".mix_list")) {
                     val dataLogList = decompressGzip(
-                        receiveBytes(1024 * 1024 * 50)
+                        receiveBytes(50.mb)
                     ).into<List<FileDataLog>>()
                     dataLogList.forEach {
                         webDav.addFileNode(

@@ -1,9 +1,9 @@
-package com.donut.mixfile.server.core.routes.api.webdav.utils
+package com.donut.mixfile.server.core.routes.api.webdav.objects
 
 import com.alibaba.fastjson2.annotation.JSONField
 import com.donut.mixfile.server.core.utils.hashSHA256
 import com.donut.mixfile.server.core.utils.parseFileMimeType
-import com.donut.mixfile.server.core.utils.sanitizeWebDavFileName
+import com.donut.mixfile.server.core.utils.sanitizeFileName
 import com.donut.mixfile.server.core.utils.toHex
 import io.ktor.http.*
 import java.text.SimpleDateFormat
@@ -19,10 +19,7 @@ class WebDavFile(
 ) {
 
     init {
-        if (name.isNotEmpty()) {
-            name = name.sanitizeWebDavFileName().decodeURLQueryComponent()
-        }
-
+        name = name.trim().ifEmpty { "root" }.sanitizeFileName()
     }
 
     override fun equals(other: Any?): Boolean {
@@ -50,7 +47,7 @@ class WebDavFile(
                 "D:propstat" {
                     "D:prop" {
                         "D:displayname" {
-                            -name.ifEmpty { "root" }.encodeURLParameter()
+                            -name.encodeURLParameter()
                         }
                         "D:resourcetype" {
                             "D:collection" {

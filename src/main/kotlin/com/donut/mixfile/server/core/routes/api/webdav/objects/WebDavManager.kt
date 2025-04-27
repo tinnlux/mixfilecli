@@ -1,4 +1,4 @@
-package com.donut.mixfile.server.core.routes.api.webdav.utils
+package com.donut.mixfile.server.core.routes.api.webdav.objects
 
 import com.alibaba.fastjson2.into
 import com.alibaba.fastjson2.toJSONString
@@ -110,7 +110,7 @@ open class WebDavManager {
         val normalizedPath = normalizePath(path)
         val files = WEBDAV_DATA.getOrPut(normalizedPath) { HashSet() }
         if (path.isEmpty() && name.isEmpty()) {
-            return WebDavFile(name = "", isFolder = true)
+            return WebDavFile(name = "root", isFolder = true)
         }
         synchronized(files) {
             return files.firstOrNull { it.name.contentEquals(name) }
@@ -151,8 +151,8 @@ open class WebDavManager {
         val fileList = WEBDAV_DATA[normalizedPath]?.toList() ?: return
         fileList.forEach { node ->
             node.lastModified = System.currentTimeMillis()
-            val childPath = "$normalizedPath/${node.name}"
-            if (node.isFolder) {
+            val childPath = normalizePath("$normalizedPath/${node.name}")
+            if (node.isFolder && node.name.isNotEmpty()) {
                 removeCollectionContents(childPath) // 递归删除子目录
             }
             removeFileNode(childPath) // 删除子文件或目录

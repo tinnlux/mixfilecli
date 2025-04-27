@@ -1,6 +1,6 @@
 package com.donut.mixfile.server.core.utils
 
-import com.donut.mixfile.server.core.utils.bean.MixShareInfo
+import com.donut.mixfile.server.core.objects.MixShareInfo
 import java.security.MessageDigest
 
 tailrec fun String.hashToMD5String(round: Int = 1): String {

@@ -43,13 +43,23 @@ fun getCipher(mode: Int, key: ByteArray, iv: ByteArray): Cipher {
     return cipher
 }
 
-suspend fun decryptAES(data: ByteReadChannel, key: ByteArray): ByteArray {
+
+suspend fun decryptAES(
+    data: ByteReadChannel,
+    key: ByteArray,
+    limit: Int
+): ByteArray {
     val iv = data.readRemaining(12).readByteArray()
     val cipher = getCipher(Cipher.DECRYPT_MODE, key, iv)
     val result = ByteArrayOutputStream()
+    var size = 0
     withContext(Dispatchers.IO) {
         while (!data.isClosedForRead) {
-            val buffer = data.readRemaining(1024).readByteArray()
+            if (size >= limit) {
+                throw Exception("分片文件过大")
+            }
+            val buffer = data.readRemaining(1024 * 64).readByteArray()
+            size += buffer.size
             result.write(cipher.update(buffer))
         }
         result.write(cipher.doFinal())

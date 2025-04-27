@@ -7,7 +7,7 @@ import java.util.concurrent.ConcurrentSkipListMap
 
 class SortedTask(limit: Int) {
     private val taskMap = ConcurrentSkipListMap<Int, (suspend () -> Unit)>()
-    private val semaphore = Semaphore(limit)
+    private val semaphore = Semaphore(limit.coerceAtLeast(1))
     private val placeholder = suspend {}
     private val lock = Mutex()
 

@@ -5,12 +5,12 @@ import com.alibaba.fastjson2.toJSONString
 import com.donut.mixfile.server.CustomUploader
 import com.donut.mixfile.server.core.MixFileServer
 import com.donut.mixfile.server.core.Uploader
-import com.donut.mixfile.server.core.routes.api.webdav.utils.WebDavManager
+import com.donut.mixfile.server.core.objects.MixShareInfo
+import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavManager
 import com.donut.mixfile.server.core.uploaders.A3Uploader
 import com.donut.mixfile.server.core.uploaders.hidden.A1Uploader
 import com.donut.mixfile.server.core.uploaders.hidden.A2Uploader
 import com.donut.mixfile.server.core.utils.MixUploadTask
-import com.donut.mixfile.server.core.utils.bean.MixShareInfo
 import com.donut.mixfile.server.core.utils.compressGzip
 import com.donut.mixfile.server.core.utils.decompressGzip
 import com.donut.mixfile.util.file.addUploadLog
@@ -18,6 +18,7 @@ import com.donut.mixfile.util.file.uploadLogs
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
+import io.ktor.utils.io.*
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.awt.image.BufferedImage
@@ -113,6 +114,7 @@ fun main(args: Array<String>) {
     } catch (_: Exception) {
 
     }
+    val logger = LoggerFactory.getLogger("io.ktor.server.Application")
 
     val server = object : MixFileServer(
         serverPort = config.port,
@@ -133,7 +135,12 @@ fun main(args: Array<String>) {
             get() = webDavManager
 
         override fun onError(error: Throwable) {
-            System.err.println(error.stackTraceToString())
+            when (error) {
+                is ClosedWriteChannelException -> return
+                is ClosedByteChannelException -> return
+            }
+
+            logger.error(error.stackTraceToString())
         }
 
         override fun getUploader(): Uploader {
@@ -178,7 +185,6 @@ fun main(args: Array<String>) {
             }
         }
     }
-    val logger = LoggerFactory.getLogger("io.ktor.server.Application")
     logger.info("MixFile已在 ${config.host}:${server.serverPort} 启动  线路: ${server.getUploader().name}")
     server.start(true)
 }

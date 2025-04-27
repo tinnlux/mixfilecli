@@ -1,8 +1,9 @@
 package com.donut.mixfile.server.core.routes.api
 
 import com.donut.mixfile.server.core.MixFileServer
+import com.donut.mixfile.server.core.objects.MixFile
+import com.donut.mixfile.server.core.objects.MixShareInfo
 import com.donut.mixfile.server.core.utils.*
-import com.donut.mixfile.server.core.utils.bean.MixShareInfo
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*
@@ -69,33 +70,49 @@ suspend fun MixFileServer.respondMixFile(call: ApplicationCall, shareInfo: MixSh
         }
         contentLength = mixFile.fileSize - range.first
     }
-    responseDownloadFileStream(call, fileList, contentLength, shareInfo, referer, name)
+    responseDownloadFileStream(
+        call = call,
+        fileList = fileList,
+        contentLength = contentLength,
+        shareInfo = shareInfo,
+        mixFile = mixFile,
+        referer = referer,
+        name = name
+    )
 }
 
 private suspend fun MixFileServer.responseDownloadFileStream(
     call: ApplicationCall,
-    fileDataList: List<Pair<String, Int>>,
+    fileList: List<Pair<String, Int>>,
     contentLength: Long,
     shareInfo: MixShareInfo,
+    mixFile: MixFile,
     referer: String = shareInfo.referer,
     name: String = shareInfo.fileName
 ) {
     coroutineScope {
-        val fileList = fileDataList.toMutableList()
+        val chunkSize = mixFile.chunkSize
+        val chunkSizeMB = chunkSize / 1.mb
+        val taskCount = downloadTaskCount / chunkSizeMB.coerceAtLeast(1)
+        val fileListToWrite = fileList.toMutableList()
         call.respondBytesWriter(
             contentType = name.parseFileMimeType(),
             contentLength = contentLength
         ) {
-            val sortedTask = SortedTask(downloadTaskCount)
+            val sortedTask = SortedTask(taskCount.coerceAtLeast(1))
             val tasks = mutableListOf<Deferred<Unit>>()
-            while (!isClosedForWrite && fileList.isNotEmpty()) {
-                val currentFile = fileList.removeAt(0)
-                val taskOrder = -fileList.size
+            while (!isClosedForWrite && fileListToWrite.isNotEmpty()) {
+                val currentFile = fileListToWrite.removeAt(0)
+                val taskOrder = -fileListToWrite.size
                 sortedTask.prepareTask(taskOrder)
                 tasks.add(async {
                     val (url, range) = currentFile
-                    val dataBytes =
+                    val dataBytes = try {
                         shareInfo.fetchFile(url, httpClient, referer)
+                    } catch (e: Exception) {
+                        close(e)
+                        throw e
+                    }
                     sortedTask.addTask(taskOrder) {
                         val dataToWrite = when {
                             range == 0 -> dataBytes
@@ -107,6 +124,7 @@ private suspend fun MixFileServer.responseDownloadFileStream(
                             onDownloadData(dataToWrite)
                         } catch (e: Exception) {
                             close(e)
+                            throw e
                         }
                     }
                     sortedTask.execute()

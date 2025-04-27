@@ -75,6 +75,10 @@ fun Boolean?.toInt(): Int {
     return 0
 }
 
+val Long.mb get() = this * 1024 * 1024
+
+val Int.mb get() = this * 1024 * 1024
+
 fun Int.negative(): Int {
     return -this
 }

@@ -3,9 +3,9 @@ package com.donut.mixfile.server.core.routes.api
 import com.donut.mixfile.server.core.MixFileServer
 import com.donut.mixfile.server.core.Uploader
 import com.donut.mixfile.server.core.aes.generateRandomByteArray
+import com.donut.mixfile.server.core.objects.MixFile
+import com.donut.mixfile.server.core.objects.MixShareInfo
 import com.donut.mixfile.server.core.utils.MixUploadTask
-import com.donut.mixfile.server.core.utils.bean.MixFile
-import com.donut.mixfile.server.core.utils.bean.MixShareInfo
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*
@@ -88,7 +88,7 @@ private suspend fun MixFileServer.doUploadFile(
 
         while (!channel.isClosedForRead) {
             semaphore.acquire()
-            val fileData = channel.readRemaining(chunkSize).readByteArray()
+            val fileData = channel.readRemaining(chunkSize.toLong()).readByteArray()
             val currentIndex = fileIndex
             fileIndex++
             tasks.add(async {
