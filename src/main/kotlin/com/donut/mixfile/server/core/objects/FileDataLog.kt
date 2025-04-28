@@ -2,6 +2,7 @@ package com.donut.mixfile.server.core.objects
 
 import com.alibaba.fastjson2.toJSONString
 import com.donut.mixfile.server.core.utils.compressGzip
+import io.ktor.http.*
 
 data class FileDataLog(
     val shareInfoData: String,
@@ -27,6 +28,16 @@ data class FileDataLog(
         return isSimilar(other) && category.contentEquals(other.category)
     }
 }
+
+val FileDataLog.mimeType get() = ContentType.defaultForFilePath(name)
+
+val FileDataLog.contentType get() = this.mimeType.contentType
+
+val FileDataLog.contentSubType get() = this.mimeType.contentSubtype
+
+val FileDataLog.isImage get() = this.contentType.contentEquals("image")
+
+val FileDataLog.isVideo get() = this.contentType.contentEquals("video")
 
 fun Collection<FileDataLog>.toByteArray(): ByteArray {
     val strData = this.toJSONString()
