@@ -18,6 +18,7 @@ import io.ktor.client.statement.*
 import io.ktor.http.*
 import io.ktor.utils.io.*
 
+
 data class MixShareInfo(
     @JSONField(name = "f") val fileName: String,
     @JSONField(name = "s") val fileSize: Long,
@@ -131,7 +132,7 @@ data class MixShareInfo(
         return false
     }
 
-    fun contentType(): String = fileName.parseFileMimeType().toString()
+    fun contentType() = fileName.parseFileMimeType()
 
     suspend fun fetchMixFile(client: HttpClient): MixFile {
         val decryptedBytes = fetchFile(url, client = client)
