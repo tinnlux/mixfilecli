@@ -22,9 +22,15 @@ import io.ktor.server.routing.method
 import io.ktor.server.routing.route
 import io.ktor.utils.io.*
 import kotlinx.io.readByteArray
+import kotlin.collections.HashSet
+import kotlin.collections.List
 import kotlin.collections.component1
 import kotlin.collections.component2
+import kotlin.collections.forEach
+import kotlin.collections.isNotEmpty
+import kotlin.collections.joinToString
 import kotlin.collections.set
+import kotlin.collections.toMutableList
 
 const val API_PATH = "/api/webdav"
 
@@ -128,9 +134,8 @@ fun MixFileServer.getWebDAVRoute(): Route.() -> Unit {
                         val path = normalizePath(s)
                         val newPath = normalizePath("${davParentPath}/${path}")
                         val fileList = webDav.WEBDAV_DATA.getOrDefault(newPath, HashSet())
-                        fileList.removeAll(webDavFiles)
-                        fileList.addAll(webDavFiles)
-                        webDav.WEBDAV_DATA[newPath] = fileList
+                        webDavFiles.addAll(fileList)
+                        webDav.WEBDAV_DATA[newPath] = webDavFiles
                     }
                     call.respond(HttpStatusCode.Created)
                     webDav.saveData()
