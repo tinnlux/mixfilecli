@@ -487,9 +487,9 @@ Private-MAC: `+C.digest().toHex()+`\r
     height: 100px;
     align-items: center;
     justify-content: center;
-    font-size: 2rem;
+    font-size: min(2rem, 100px);
     cursor: pointer;
-    color: blueviolet;
+    color: rgba(138, 43, 226, 0.76);
     font-weight: bold;
     border: 4px dashed rgba(142, 42, 254, 0.63);
     transition: .3s;
