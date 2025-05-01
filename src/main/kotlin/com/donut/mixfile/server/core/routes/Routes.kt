@@ -24,7 +24,7 @@ fun MixFileServer.getRoutes(): Routing.() -> Unit {
             call.respondBytesWriter(
                 contentType = file.parseFileMimeType()
             ) {
-                fileStream.toByteReadChannel().copyTo(this)
+                fileStream.toByteReadChannel().copyAndClose(this)
             }
         }
         route("/api", getAPIRoute())
