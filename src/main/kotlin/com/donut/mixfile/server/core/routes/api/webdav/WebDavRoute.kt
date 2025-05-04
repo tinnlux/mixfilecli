@@ -31,8 +31,6 @@ import kotlin.collections.toMutableList
 
 const val API_PATH = "/api/webdav"
 
-val RoutingContext.decodedPath: String get() = call.request.path().decodeURLQueryComponent()
-
 val RoutingContext.davPath: String
     get() = normalizePath(decodedPath.substringAfter(API_PATH))
 

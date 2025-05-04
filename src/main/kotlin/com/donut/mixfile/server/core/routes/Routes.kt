@@ -2,9 +2,9 @@ package com.donut.mixfile.server.core.routes
 
 import com.donut.mixfile.server.core.MixFileServer
 import com.donut.mixfile.server.core.routes.api.getAPIRoute
+import com.donut.mixfile.server.core.utils.decodedPath
 import com.donut.mixfile.server.core.utils.parseFileMimeType
 import io.ktor.http.*
-import io.ktor.server.request.*
 import io.ktor.server.response.*
 import io.ktor.server.routing.Routing
 import io.ktor.server.routing.get
@@ -16,7 +16,7 @@ fun MixFileServer.getRoutes(): Routing.() -> Unit {
 
     return {
         get("{param...}") {
-            val file = call.request.path().substring(1).ifEmpty {
+            val file = decodedPath.substring(1).ifEmpty {
                 "index.html"
             }
             val fileStream =
@@ -27,8 +27,8 @@ fun MixFileServer.getRoutes(): Routing.() -> Unit {
                 fileStream.toByteReadChannel().copyAndClose(this)
             }
         }
-        route("/api", getAPIRoute())
 
+        route("/api", getAPIRoute())
     }
 }
 

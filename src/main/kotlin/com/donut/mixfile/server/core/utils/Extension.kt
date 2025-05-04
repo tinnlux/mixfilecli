@@ -1,5 +1,8 @@
 package com.donut.mixfile.server.core.utils
 
+import io.ktor.http.*
+import io.ktor.server.request.*
+import io.ktor.server.routing.*
 import java.nio.ByteBuffer
 import kotlin.streams.toList
 
@@ -75,9 +78,14 @@ fun Boolean?.toInt(): Int {
     return 0
 }
 
-val Long.mb get() = this * 1024 * 1024
+val Int.kb get() = this * 1024
 
-val Int.mb get() = this * 1024 * 1024
+val Long.kb get() = this * 1024
+
+val Long.mb get() = this * 1024.kb
+
+val Int.mb get() = this * 1024.kb
+
 
 fun Int.negative(): Int {
     return -this
@@ -165,3 +173,5 @@ fun ByteArray.toInt(): Int =
 
 
 infix fun <T> T?.default(value: T) = this ?: value
+
+val RoutingContext.decodedPath: String get() = call.request.path().decodeURLQueryComponent()

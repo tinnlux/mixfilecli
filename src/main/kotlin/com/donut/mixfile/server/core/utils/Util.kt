@@ -23,10 +23,6 @@ import java.util.zip.GZIPInputStream
 import java.util.zip.GZIPOutputStream
 import kotlin.random.Random
 
-fun String.getFileExtension(): String {
-    return substringAfterLast(".", "")
-}
-
 fun String.sanitizeFileName(): String {
     // 定义非法字符，包括控制字符、文件系统非法字符、路径遍历等
     val illegalChars = "[\\x00-\\x1F\\x7F/\\\\:*?\"<>|]".toRegex()
@@ -41,13 +37,13 @@ fun String.sanitizeFileName(): String {
     var sanitized = this
         // 替换非法字符为下划线
         .replace(illegalChars, "_")
-        // 移除路径遍历序列
-        .replace("..", "_")
         .trim()
 
-    // 检查是否为 Windows 保留文件名
-    val baseName = sanitized.substringBeforeLast(".").uppercase()
-    if (baseName in reservedNames) {
+    if (sanitized.all { it == '.' }) {
+        sanitized = "unnamed_file"
+    }
+
+    if (sanitized.uppercase() in reservedNames) {
         sanitized = "_$sanitized"
     }
 
