@@ -104,12 +104,13 @@ data class MixShareInfo(
             }
         }.execute {
             val contentLength = it.contentLength() ?: 0
-            if (contentLength > (limit + headSize + 192)) {
+            // iv + ghash 各96位,12字节,共24字节
+            if (contentLength > (limit + headSize + 24)) {
                 throw Exception("分片文件过大")
             }
             val channel = it.bodyAsChannel()
             channel.discard(headSize.toLong())
-            decryptAES(channel, ENCODER.decode(key), limit + 96)
+            decryptAES(channel, ENCODER.decode(key), limit)
         }
         val hash = Url(url).fragment.trim()
         if (hash.isNotEmpty()) {
@@ -134,8 +135,8 @@ data class MixShareInfo(
 
     fun contentType() = fileName.parseFileMimeType()
 
-    suspend fun fetchMixFile(client: HttpClient): MixFile {
-        val decryptedBytes = fetchFile(url, client = client)
+    suspend fun fetchMixFile(client: HttpClient, referer: String = this.referer): MixFile {
+        val decryptedBytes = fetchFile(url, client = client, referer = referer)
         return MixFile.fromBytes(decryptedBytes)
     }
 

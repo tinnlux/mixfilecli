@@ -37,8 +37,13 @@ fun MixFileServer.getDownloadRoute(): RoutingHandler {
 
 suspend fun MixFileServer.respondMixFile(call: ApplicationCall, shareInfo: MixShareInfo) {
     val param = call.parameters
+
+    val referer = param["referer"].ifNullOrBlank { shareInfo.referer }
+
+    val name = param["name"].ifNullOrBlank { shareInfo.fileName }
+
     val mixFile = try {
-        shareInfo.fetchMixFile(httpClient)
+        shareInfo.fetchMixFile(httpClient, referer)
     } catch (e: Exception) {
         call.respondText(
             "解析文件索引失败: ${e.stackTraceToString()}",
@@ -46,10 +51,6 @@ suspend fun MixFileServer.respondMixFile(call: ApplicationCall, shareInfo: MixSh
         )
         return
     }
-
-    val referer = param["referer"].ifNullOrBlank { shareInfo.referer }
-
-    val name = param["name"].ifNullOrBlank { shareInfo.fileName }
 
     var contentLength = shareInfo.fileSize
     val range: LongRange? = call.request.ranges()?.mergeToSingle(contentLength)

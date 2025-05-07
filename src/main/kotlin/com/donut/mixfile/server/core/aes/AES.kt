@@ -55,7 +55,8 @@ suspend fun decryptAES(
     var size = 0
     withContext(Dispatchers.IO) {
         while (!data.isClosedForRead) {
-            if (size >= limit) {
+            // +12字节ghash 大小,iv已读取
+            if (size >= limit + 12) {
                 throw Exception("分片文件过大")
             }
             val buffer = data.readRemaining(1024 * 64).readByteArray()
