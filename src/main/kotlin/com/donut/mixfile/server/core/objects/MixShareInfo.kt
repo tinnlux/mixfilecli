@@ -104,7 +104,7 @@ data class MixShareInfo(
             }
         }.execute {
             val contentLength = it.contentLength() ?: 0
-            if (contentLength > (limit + headSize)) {
+            if (contentLength > (limit + headSize + 192)) {
                 throw Exception("分片文件过大")
             }
             val channel = it.bodyAsChannel()

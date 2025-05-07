@@ -341,7 +341,7 @@ In order to be iterable, non-array objects must have a [Symbol.iterator]() metho
     button {
         font-size: max(.6rem, 14px);
     }
-`;function qx({fileList:e}){const[t,r]=st(!1),[n,i]=st(`文件分享-${tP()}`);return D(hU,{className:"shadow",children:[D("h4",{children:"导出文件列表"}),D("div",{class:"content",children:D(iC,{label:"文件列表名称",variant:"outlined",value:n,onChange:a=>{i(a.target.value.trim)}})}),D(si,{variant:"contained",disabled:t,onClick:async()=>{const a=e.map(({name:c,size:l,shareInfoData:u})=>({name:c,size:l,category:"",time:new Date().getTime(),shareInfoData:u})),o=tx.gzip(JSON.stringify(a)),s=`${zo}api/upload?name=${encodeURIComponent(`${n}.mix_list`)}&add=false`;r(!0);try{let c=await Bt.put(s,o,{});ud(c.data)}finally{r(!1)}},children:"确认导出"})]})}const pU=bn.div`
+`;function qx({fileList:e}){const[t,r]=st(!1),[n,i]=st(`文件分享-${tP()}`);return D(hU,{className:"shadow",children:[D("h4",{children:"导出文件列表"}),D("div",{class:"content",children:D(iC,{label:"文件列表名称",variant:"outlined",value:n,onChange:a=>{i(a.target.value.trim())}})}),D(si,{variant:"contained",disabled:t,onClick:async()=>{const a=e.map(({name:c,size:l,shareInfoData:u})=>({name:c,size:l,category:"",time:new Date().getTime(),shareInfoData:u})),o=tx.gzip(JSON.stringify(a)),s=`${zo}api/upload?name=${encodeURIComponent(`${n}.mix_list`)}&add=false`;r(!0);try{let c=await Bt.put(s,o,{});ud(c.data)}finally{r(!1)}},children:"确认导出"})]})}const pU=bn.div`
     display: flex;
     flex-direction: column;
     gap: 10px;
