@@ -14,10 +14,8 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
-import kotlin.io.encoding.ExperimentalEncodingApi
 
 
-@OptIn(ExperimentalEncodingApi::class)
 fun MixFileServer.getDownloadRoute(): RoutingHandler {
     return route@{
         val param = call.parameters
