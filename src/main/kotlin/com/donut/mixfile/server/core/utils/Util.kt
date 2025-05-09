@@ -139,10 +139,24 @@ fun compressGzip(input: String): ByteArray {
     return byteArrayOutputStream.toByteArray()
 }
 
-fun decompressGzip(compressed: ByteArray): String {
+fun decompressGzip(compressed: ByteArray, limit: Int = 200.mb): String {
     val byteArrayInputStream = ByteArrayInputStream(compressed)
     GZIPInputStream(byteArrayInputStream).use { gzip ->
-        return gzip.bufferedReader().use { it.readText() }
+        val buffer = ByteArray(1024 * 64)
+        val output = ByteArrayOutputStream()
+        var bytesRead: Int
+        var totalBytes = 0
+
+        // 循环读取数据，直到结束或达到限制
+        while (gzip.read(buffer).also { bytesRead = it } != -1) {
+            if (totalBytes + bytesRead > limit) {
+                throw Exception("压缩文件大小超过限制")
+            }
+            output.write(buffer, 0, bytesRead)
+            totalBytes += bytesRead
+        }
+
+        return output.toByteArray().decodeToString()
     }
 }
 
