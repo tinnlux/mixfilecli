@@ -13,6 +13,7 @@ import com.donut.mixfile.server.core.uploaders.hidden.A2Uploader
 import com.donut.mixfile.server.core.utils.MixUploadTask
 import com.donut.mixfile.server.core.utils.compressGzip
 import com.donut.mixfile.server.core.utils.decompressGzip
+import com.donut.mixfile.server.core.utils.ignoreError
 import com.donut.mixfile.util.file.addUploadLog
 import com.donut.mixfile.util.file.uploadLogs
 import com.sksamuel.hoplite.ConfigLoaderBuilder
@@ -109,12 +110,14 @@ fun main(args: Array<String>) {
         }
     }
 
-    try {
+    ignoreError {
         webDavManager.loadDataFromBytes(File(config.webdavPath).readBytes())
-        uploadLogs = decompressGzip(File(config.history).readBytes()).into()
-    } catch (_: Exception) {
-
     }
+
+    ignoreError {
+        uploadLogs = decompressGzip(File(config.history).readBytes()).into()
+    }
+
     val logger = LoggerFactory.getLogger("io.ktor.server.Application")
 
     val server = object : MixFileServer(
