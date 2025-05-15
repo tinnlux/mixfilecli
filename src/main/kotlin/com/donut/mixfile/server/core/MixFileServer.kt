@@ -5,6 +5,7 @@ import com.donut.mixfile.server.core.objects.MixShareInfo
 import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavManager
 import com.donut.mixfile.server.core.utils.MixUploadTask
 import com.donut.mixfile.server.core.utils.findAvailablePort
+import com.donut.mixfile.server.core.utils.mb
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -16,9 +17,12 @@ abstract class MixFileServer(
 ) {
 
 
-    abstract val downloadTaskCount: Int
-    abstract val uploadTaskCount: Int
-    abstract val requestRetryCount: Int
+    open val downloadTaskCount: Int = 5
+    open val uploadTaskCount: Int = 10
+    open val uploadRetryCount: Int = 10
+
+    open val chunkSize = 1.mb
+
 
     open val password: String = ""
 

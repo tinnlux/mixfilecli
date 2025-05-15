@@ -92,11 +92,10 @@ suspend fun MixFileServer.writeMixFileToByteChannel(
     channel: ByteWriteChannel,
 ) {
     coroutineScope {
-        val chunkSize = mixFile.chunkSize
-        val chunkSizeMB = chunkSize / 1.mb
-        val taskCount = downloadTaskCount / chunkSizeMB.coerceAtLeast(1)
+        val chunkSizeMB = mixFile.chunkSize / 1.mb
+        val taskCount = (downloadTaskCount / chunkSizeMB.coerceAtLeast(1)).coerceAtLeast(1)
         val fileListToWrite = fileList.toMutableList()
-        val sortedTask = SortedTask(taskCount.coerceAtLeast(1))
+        val sortedTask = SortedTask(taskCount)
         val tasks = mutableListOf<Deferred<Unit>>()
         while (!channel.isClosedForWrite && fileListToWrite.isNotEmpty()) {
             val currentFile = fileListToWrite.removeAt(0)

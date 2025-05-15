@@ -10,10 +10,7 @@ import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavManager
 import com.donut.mixfile.server.core.uploaders.A3Uploader
 import com.donut.mixfile.server.core.uploaders.hidden.A1Uploader
 import com.donut.mixfile.server.core.uploaders.hidden.A2Uploader
-import com.donut.mixfile.server.core.utils.MixUploadTask
-import com.donut.mixfile.server.core.utils.compressGzip
-import com.donut.mixfile.server.core.utils.decompressGzip
-import com.donut.mixfile.server.core.utils.ignoreError
+import com.donut.mixfile.server.core.utils.*
 import com.donut.mixfile.util.file.addUploadLog
 import com.donut.mixfile.util.file.uploadLogs
 import com.sksamuel.hoplite.ConfigLoaderBuilder
@@ -37,8 +34,9 @@ data class Config(
     val uploader: String = "线路A1",
     val uploadTask: Int = 10,
     val downloadTask: Int = 5,
-    val port: Int = 4719,
     val uploadRetry: Int = 10,
+    val chunkSize: Int = 1024,
+    val port: Int = 4719,
     val customUrl: String = "",
     val customReferer: String = "",
     val host: String = "0.0.0.0",
@@ -102,7 +100,9 @@ fun main(args: Array<String>) {
     val UPLOADERS = listOf(A1Uploader, A2Uploader, A3Uploader, CustomUploader)
 
     fun getCurrentUploader() = UPLOADERS.firstOrNull { it.name.contentEquals(config.uploader) } ?: A1Uploader
+
     val webDavManager = object : WebDavManager() {
+
         override suspend fun saveWebDavData(data: ByteArray) {
             val file = File(config.webdavPath)
             file.parentFile?.mkdirs()
@@ -110,12 +110,25 @@ fun main(args: Array<String>) {
         }
     }
 
-    ignoreError {
-        webDavManager.loadDataFromBytes(File(config.webdavPath).readBytes())
+    val webDavFile = File(config.webdavPath)
+    val historyFile = File(config.history)
+
+    if (webDavFile.exists()) {
+        try {
+            webDavManager.loadDataFromBytes(webDavFile.readBytes())
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw Error("载入WebDAV存档失败: " + e.message)
+        }
     }
 
-    ignoreError {
-        uploadLogs = decompressGzip(File(config.history).readBytes()).into()
+    if (historyFile.exists()) {
+        try {
+            uploadLogs = decompressGzip(historyFile.readBytes()).into()
+        } catch (e: Exception) {
+            e.printStackTrace()
+            throw Error("载入上传历史文件失败: " + e.message)
+        }
     }
 
     val logger = LoggerFactory.getLogger("io.ktor.server.Application")
@@ -129,11 +142,14 @@ fun main(args: Array<String>) {
         override val uploadTaskCount: Int
             get() = config.uploadTask
 
-        override val requestRetryCount
+        override val uploadRetryCount
             get() = config.uploadRetry
 
         override val password: String
             get() = config.password
+
+        override val chunkSize: Int
+            get() = config.chunkSize * 1.kb
 
         override val webDav: WebDavManager
             get() = webDavManager

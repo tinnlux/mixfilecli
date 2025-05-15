@@ -30,7 +30,7 @@ open class WebDavManager {
     open suspend fun saveWebDavData(data: ByteArray) {}
 
     // 添加文件或目录到指定路径
-    fun addFileNode(path: String, file: WebDavFile) {
+    open fun addFileNode(path: String, file: WebDavFile) {
         val normalizedPath = normalizePath(path)
         val fileList = WEBDAV_DATA.getOrPut(normalizedPath) { HashSet() }
         synchronized(fileList) {
@@ -44,7 +44,12 @@ open class WebDavManager {
         }
     }
 
-    fun copyFile(path: String, dest: String, overwrite: Boolean, keep: Boolean = true): Boolean {
+    open fun copyFile(
+        path: String,
+        dest: String,
+        overwrite: Boolean,
+        keep: Boolean = true
+    ): Boolean {
         val srcFile = getFile(path) ?: return false
         val destFile = getFile(dest)
         if (!overwrite && destFile != null) {
@@ -79,7 +84,7 @@ open class WebDavManager {
     }
 
     // 删除指定路径的文件或目录
-    fun removeFileNode(path: String, removeFolder: Boolean = true) {
+    open fun removeFileNode(path: String, removeFolder: Boolean = true) {
         val normalizedPath = normalizePath(path)
         val parentPath = normalizedPath.substringBeforeLast('/', "")
         val name = normalizedPath.substringAfterLast('/')
@@ -99,14 +104,14 @@ open class WebDavManager {
         }
     }
 
-    fun getFile(path: String): WebDavFile? {
+    open fun getFile(path: String): WebDavFile? {
         val normalizedPath = normalizePath(path)
         val parentPath = normalizedPath.substringBeforeLast('/', "")
         val name = normalizedPath.substringAfterLast('/')
         return getFile(parentPath, name)
     }
 
-    fun getFile(path: String, name: String): WebDavFile? {
+    open fun getFile(path: String, name: String): WebDavFile? {
         val normalizedPath = normalizePath(path)
         val files = WEBDAV_DATA.getOrPut(normalizedPath) { HashSet() }
         if (path.isEmpty() && name.isEmpty()) {
@@ -118,7 +123,7 @@ open class WebDavManager {
     }
 
     // 列出指定路径下的文件和目录
-    fun listFiles(path: String): List<WebDavFile>? {
+    open fun listFiles(path: String): List<WebDavFile>? {
         val normalizedPath = normalizePath(path)
         val result = WEBDAV_DATA[normalizedPath]
         if (result == null && path.isEmpty()) {
@@ -127,7 +132,7 @@ open class WebDavManager {
         return result?.toList()
     }
 
-    fun listFilesRecursive(path: String): ConcurrentHashMap<String, MutableSet<WebDavFile>> {
+    open fun listFilesRecursive(path: String): ConcurrentHashMap<String, MutableSet<WebDavFile>> {
         val normalizedPath = normalizePath(path)
         val result = ConcurrentHashMap<String, MutableSet<WebDavFile>>()
         fun addFolder(path: String) {
