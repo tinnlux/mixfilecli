@@ -1,4 +1,3 @@
-import io.ktor.plugin.features.*
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
 val kotlin_version: String by project
@@ -11,7 +10,7 @@ plugins {
 }
 
 group = "com.donut.mixfilecli"
-version = "1.10.2"
+version = "1.10.3"
 
 application {
     mainClass.set("com.donut.mixfilecli.ApplicationKt")
@@ -34,7 +33,7 @@ java {
 
 tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach {
     compilerOptions {
-       jvmTarget.set(JvmTarget.JVM_11)
+        jvmTarget.set(JvmTarget.JVM_11)
     }
 }
 

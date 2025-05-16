@@ -8,9 +8,6 @@ import io.ktor.client.*
 import io.ktor.http.*
 import kotlin.collections.component1
 import kotlin.collections.component2
-import kotlin.collections.fold
-import kotlin.collections.mutableMapOf
-import kotlin.collections.plus
 import kotlin.collections.set
 
 abstract class Uploader(val name: String) {
