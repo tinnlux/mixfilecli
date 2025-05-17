@@ -10,10 +10,7 @@ import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavManager
 import com.donut.mixfile.server.core.uploaders.A3Uploader
 import com.donut.mixfile.server.core.uploaders.hidden.A1Uploader
 import com.donut.mixfile.server.core.uploaders.hidden.A2Uploader
-import com.donut.mixfile.server.core.utils.MixUploadTask
-import com.donut.mixfile.server.core.utils.compressGzip
-import com.donut.mixfile.server.core.utils.decompressGzip
-import com.donut.mixfile.server.core.utils.kb
+import com.donut.mixfile.server.core.utils.*
 import com.donut.mixfile.util.file.addUploadLog
 import com.donut.mixfile.util.file.uploadLogs
 import com.sksamuel.hoplite.ConfigLoaderBuilder
@@ -209,7 +206,8 @@ fun main(args: Array<String>) {
             }
         }
     }
-    logger.info("MixFile已在 ${config.host}:${server.serverPort} 启动  线路: ${server.getUploader().name}")
+    val startPort = findAvailablePort(server.serverPort) ?: server.serverPort
+    logger.info("MixFile已在 ${config.host}:${startPort} 启动  线路: ${server.getUploader().name}")
     server.start(true)
 }
 
