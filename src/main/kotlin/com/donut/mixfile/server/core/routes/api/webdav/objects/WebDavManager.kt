@@ -166,7 +166,7 @@ open class WebDavManager {
     }
 }
 
-fun String?.toDavPath() = normalizePath(this ?: "")
+fun String?.normalPath() = normalizePath(this ?: "")
 
 
 fun normalizePath(path: String): String {

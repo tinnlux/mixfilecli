@@ -43,11 +43,12 @@ class WebDavFile(
 
     override fun hashCode(): Int = name.hashCode()
 
-    fun toXML(path: String): String {
+    fun toXML(path: String, isRoot: Boolean = false): String {
+        val pathName = name.takeIf { !isRoot } ?: ""
         if (isFolder) {
             return xml("D:response") {
                 "D:href" {
-                    -"/${normalizePath("$path/$name")}/".encodeURLPath(encodeEncoded = true)
+                    -"/${"$path/${pathName}".normalPath()}/".encodeURLPath(encodeEncoded = true)
                 }
                 "D:propstat" {
                     "D:prop" {
@@ -56,7 +57,7 @@ class WebDavFile(
                         }
                         "D:resourcetype" {
                             "D:collection" {
-
+                                attribute("xmlns:D", "DAV:")
                             }
                         }
 
@@ -72,7 +73,7 @@ class WebDavFile(
         }
         return xml("D:response") {
             "D:href" {
-                -"/${normalizePath(path)}/${name}".encodeURLPath(encodeEncoded = true)
+                -"/${"$path/$name".normalPath()}".encodeURLPath(encodeEncoded = true)
             }
             "D:propstat" {
                 "D:prop" {

@@ -13,7 +13,7 @@ fun MixFileServer.getAPIRoute(): Route.() -> Unit {
     return {
         mixBasicAuth({ password })
 
-        route("/webdav", getWebDAVRoute())
+        route("/webdav/{param...}", getWebDAVRoute())
 
         get("/download/{name?}", getDownloadRoute())
 
