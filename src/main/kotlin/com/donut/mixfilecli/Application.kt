@@ -18,6 +18,9 @@ import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
 import io.ktor.util.cio.*
 import io.ktor.utils.io.*
+import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.awt.image.BufferedImage
@@ -88,6 +91,8 @@ fun createRandomGifByteArray(): ByteArray {
     return byteArrayOutputStream.toByteArray()
 }
 
+val appScope = CoroutineScope(Dispatchers.Default + Job())
+
 @OptIn(ExperimentalHoplite::class)
 fun main(args: Array<String>) {
     checkConfig()
@@ -102,11 +107,20 @@ fun main(args: Array<String>) {
     fun getCurrentUploader() = UPLOADERS.firstOrNull { it.name.contentEquals(config.uploader) } ?: A1Uploader
 
     val webDavManager = object : WebDavManager() {
-
+        val mutex = Mutex()
+        var saveTask: Job? = null
         override suspend fun saveWebDavData(data: ByteArray) {
-            val file = File(config.webdavPath)
-            file.parentFile?.mkdirs()
-            file.writeBytes(data)
+            synchronized(this) {
+                saveTask?.cancel()
+                saveTask = appScope.launch {
+                    mutex.withLock {
+                        delay(100)
+                        val file = File(config.webdavPath)
+                        file.parentFile?.mkdirs()
+                        file.writeBytes(data)
+                    }
+                }
+            }
         }
     }
 
