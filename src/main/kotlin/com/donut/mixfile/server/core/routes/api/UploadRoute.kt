@@ -6,7 +6,7 @@ import com.donut.mixfile.server.core.aes.generateRandomByteArray
 import com.donut.mixfile.server.core.objects.MixFile
 import com.donut.mixfile.server.core.objects.MixShareInfo
 import com.donut.mixfile.server.core.utils.MixUploadTask
-import com.donut.mixfile.server.core.utils.mb
+import com.donut.mixfile.server.core.utils.extensions.mb
 import io.ktor.http.*
 import io.ktor.server.request.*
 import io.ktor.server.response.*

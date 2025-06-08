@@ -2,6 +2,7 @@ package com.donut.mixfile.server.core.utils
 
 
 import com.donut.mixfile.server.core.aes.generateRandomByteArray
+import com.donut.mixfile.server.core.utils.extensions.mb
 import io.ktor.client.request.forms.*
 import io.ktor.http.*
 import io.ktor.http.content.*
@@ -191,6 +192,7 @@ suspend fun <T> retry(
         try {
             return block()
         } catch (e: Exception) {
+            if (e is CancellationException) throw e
             delay(delay)
         }
     }
@@ -201,7 +203,7 @@ fun RoutingContext.getHeader(name: String) = call.request.header(name)
 
 fun findAvailablePort(startPort: Int = 9527, endPort: Int = 65535): Int? {
     for (port in startPort..endPort) {
-        ignoreError {
+        ignoreError<Int> {
             // 尝试绑定到指定端口
             ServerSocket(port).use { serverSocket ->
                 // 成功绑定，返回该端口

@@ -9,29 +9,70 @@ import com.donut.mixfile.server.core.utils.toHex
 import io.ktor.http.*
 import java.text.SimpleDateFormat
 import java.util.*
+import java.util.concurrent.ConcurrentHashMap
+import kotlin.collections.component1
+import kotlin.collections.component2
+import kotlin.collections.set
 
 
-fun WebDavFile.toDataLog() = FileDataLog(shareInfoData, name, size)
+fun WebDavFile.toDataLog() = FileDataLog(shareInfoData, getName(), size)
 
 // WebDAV 文件类，包含额外属性
-class WebDavFile(
-    var name: String,
+data class WebDavFile(
+    private var name: String,
     val size: Long = 0,
     val shareInfoData: String = "",
     val isFolder: Boolean = false,
+    val files: ConcurrentHashMap<String, WebDavFile> = ConcurrentHashMap(),
     var lastModified: Long = System.currentTimeMillis()
 ) {
 
     init {
+        sanitizeName()
+    }
+
+    fun setName(name: String) {
+        this.name = name
+        sanitizeName()
+    }
+
+    fun getName() = name
+
+    fun sanitizeName() {
         name = name.trim().sanitizeFileName()
     }
 
-    override fun equals(other: Any?): Boolean {
-        if (this === other) return true
-        if (other !is WebDavFile) return false
+    fun clone(): WebDavFile {
 
-        return name.contentEquals(other.name)
+        val newFiles = ConcurrentHashMap<String, WebDavFile>()
+
+        files.forEach { (key, file) ->
+            newFiles[key] = file.clone()
+        }
+
+        return copy(files = newFiles)
     }
+
+    fun addFile(file: WebDavFile) {
+        if (!this.isFolder) {
+            return
+        }
+        val existingFile = files[file.name]
+        if (existingFile != null && existingFile.isFolder && file.isFolder) {
+            file.files.forEach { (name, subFile) ->
+                if (subFile.isFolder) {
+                    existingFile.addFile(subFile)
+                    return@forEach
+                }
+                existingFile.files[name] = subFile.clone()
+            }
+            return
+        }
+        files[file.name] = file.clone()
+    }
+
+    fun listFiles() = files.values.toList()
+
 
     @JSONField(serialize = false)
     fun getLastModifiedFormatted(): String {
@@ -40,8 +81,6 @@ class WebDavFile(
         return sdf.format(Date(lastModified))
     }
 
-
-    override fun hashCode(): Int = name.hashCode()
 
     fun toXML(path: String, isRoot: Boolean = false): String {
         val pathName = name.takeIf { !isRoot } ?: ""

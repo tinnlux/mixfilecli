@@ -10,8 +10,26 @@ data class FileDataLog(
     val name: String,
     val size: Long,
     val time: Long = System.currentTimeMillis(),
-    val category: String = "默认",
+    private var category: String = "默认",
 ) {
+
+    init {
+        sanitizeCategory()
+    }
+
+    fun getCategory() = category
+
+    fun setCategory(category: String) {
+        this.category = category
+        sanitizeCategory()
+    }
+
+    fun sanitizeCategory() {
+        if (category.trim().isEmpty()) {
+            category = "默认"
+        }
+        category = category.take(20)
+    }
 
     fun isSimilar(other: FileDataLog): Boolean {
         return other.shareInfoData.contentEquals(shareInfoData)
