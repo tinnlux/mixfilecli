@@ -10,7 +10,7 @@ plugins {
 }
 
 group = "com.donut.mixfilecli"
-version = "1.11.0"
+version = "1.11.1"
 
 application {
     mainClass.set("com.donut.mixfilecli.ApplicationKt")
@@ -54,14 +54,14 @@ dependencies {
     implementation("io.ktor:ktor-client-okhttp")
     implementation("io.ktor:ktor-client-logging")
     implementation("io.ktor:ktor-client-content-negotiation")
-    implementation("io.ktor:ktor-server-netty")
-    implementation("io.ktor:ktor-server-content-negotiation")
-    implementation("com.sksamuel.hoplite:hoplite-core:2.8.2")
-    implementation("com.sksamuel.hoplite:hoplite-yaml:2.8.2")
     implementation("io.ktor:ktor-server-core")
+    implementation("io.ktor:ktor-server-netty")
     implementation("io.ktor:ktor-server-default-headers")
     implementation("io.ktor:ktor-server-status-pages")
     implementation("io.ktor:ktor-server-cors")
+    implementation("io.ktor:ktor-server-content-negotiation")
+    implementation("com.sksamuel.hoplite:hoplite-core:2.8.2")
+    implementation("com.sksamuel.hoplite:hoplite-yaml:2.8.2")
     implementation("ch.qos.logback:logback-classic:1.5.13")
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
