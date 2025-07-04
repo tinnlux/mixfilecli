@@ -16,6 +16,7 @@ import com.donut.mixfile.server.core.utils.decompressGzip
 import com.donut.mixfile.server.core.utils.extensions.kb
 import com.donut.mixfile.server.core.utils.findAvailablePort
 import com.donut.mixfile.util.file.addUploadLog
+import com.donut.mixfile.util.file.formatFileSize
 import com.donut.mixfile.util.file.uploadLogs
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
@@ -207,6 +208,7 @@ fun main(args: Array<String>) {
                 override var stopped: Boolean = false
 
                 override suspend fun complete(shareInfo: MixShareInfo) {
+                    logger.info("文件上传成功: ${shareInfo.fileName} ${formatFileSize(shareInfo.fileSize)}")
                     if (add) {
                         addUploadLog(shareInfo)
                         val file = File(config.history)
@@ -215,7 +217,7 @@ fun main(args: Array<String>) {
                     }
                 }
 
-                override val onStop: MutableList<suspend () -> Unit> = mutableListOf()
+                override val stopFunc: MutableList<suspend () -> Unit> = mutableListOf()
 
 
                 override suspend fun updateProgress(size: Long, total: Long) {

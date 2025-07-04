@@ -19,6 +19,7 @@ import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import java.nio.ByteBuffer
 
 
 fun MixFileServer.getDownloadRoute(): RoutingHandler {
@@ -115,14 +116,16 @@ suspend fun MixFileServer.writeMixFileToByteChannel(
                     throw e
                 }
                 sortedTask.addTask(taskOrder) {
-                    val dataToWrite = when {
-                        range == 0 -> dataBytes
-                        range < 0 -> dataBytes.copyOfRange(0, -range) //一般无 < 0 的情况
-                        else -> dataBytes.copyOfRange(range, dataBytes.size)
+                    val buffer = ByteBuffer.wrap(dataBytes)
+
+                    when {
+                        range < 0 -> buffer.limit(dataBytes.size + range) //一般无 < 0 的情况
+                        range > 0 -> buffer.position(range)
                     }
+
                     try {
-                        channel.writeFully(dataToWrite)
-                        onDownloadData(dataToWrite)
+                        channel.writeFully(buffer)
+                        onDownloadData(dataBytes)
                     } catch (e: Exception) {
                         channel.close(e)
                         throw e

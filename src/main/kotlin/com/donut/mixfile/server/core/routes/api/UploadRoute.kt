@@ -44,20 +44,26 @@ suspend fun MixFileServer.uploadFile(
     key: ByteArray = generateRandomByteArray(32),
     onStop: suspend () -> Unit = {}
 ): String {
+
     val uploadTask = getUploadTask(name, size, add)
-    uploadTask.onStop.add(onStop)
+
+    uploadTask.stopFunc.add(onStop)
+
     currentCoroutineContext().job.invokeOnCompletion {
-        uploadTask.error = it
-        uploadTask.stopped = true
+        uploadTask.stop(it)
     }
+
     val uploader = getUploader()
+
     val head = uploader.genHead(httpClient) ?: genDefaultImage()
-    val mixUrl =
+
+    val (mixUrl, fileSize) =
         doUploadFile(channel, head, uploader, key, fileSize = size, uploadTask)
+
     val mixShareInfo =
         MixShareInfo(
             fileName = name,
-            fileSize = size,
+            fileSize = fileSize,
             headSize = head.size,
             url = mixUrl,
             key = MixShareInfo.ENCODER.encode(key),
@@ -74,49 +80,69 @@ private suspend fun MixFileServer.doUploadFile(
     secret: ByteArray,
     fileSize: Long,
     uploadTask: MixUploadTask,
-): String {
+): Pair<String, Long> {
+
     val chunkSizeMB = chunkSize / 1.mb
+
     val semaphore = Semaphore((uploadTaskCount / chunkSizeMB.coerceAtLeast(1)).coerceAtLeast(1))
+
     return coroutineScope {
-        uploadTask.onStop.add(0) {
+
+        uploadTask.stopFunc.add(0) {
             channel.cancel()
         }
+
         val fixedChunkSize = min(20.mb, chunkSize)
-        //固定大小string list
-        val fileListLength = ceil(fileSize.toDouble() / fixedChunkSize).toInt()
-        val fileList = List(fileListLength) { "" }.toMutableList()
-        var fileIndex = 0
-        val tasks = mutableListOf<Deferred<Unit?>>()
+
+        val chunkCount = ceil(fileSize / fixedChunkSize.toDouble()).toInt()
+        var uploadedChunkCount = 0
+        val chunkList = mutableListOf<String>()
+
+        var chunkIndex = 0
+
+        var totalChunkSize = 0L
+
+        val tasks = mutableListOf<Deferred<Unit>>()
+
 
         while (!channel.isClosedForRead) {
             semaphore.acquire()
-            val fileData = channel.readRemaining(fixedChunkSize.toLong()).readByteArray()
-            val currentIndex = fileIndex
-            fileIndex++
+            val chunkData = channel.readRemaining(fixedChunkSize.toLong()).readByteArray()
+            val currentChunkSize = chunkData.size
+            totalChunkSize += currentChunkSize
+            val currentIndex = chunkIndex
+            chunkList.add("")
+            chunkIndex++
             tasks.add(async {
                 try {
-                    val url = uploader.upload(head, fileData, secret, this@doUploadFile)
-                    fileList[currentIndex] = url
-                    uploadTask.updateProgress(fileData.size.toLong(), fileSize)
+                    val url = uploader.upload(head, chunkData, secret, this@doUploadFile)
+                    chunkList[currentIndex] = url
+                    uploadedChunkCount++
+                    uploadTask.updateProgress(currentChunkSize.toLong(), fileSize)
                 } finally {
                     semaphore.release()
                 }
             })
         }
+
         tasks.awaitAll()
-        if (fileList.any { it.isEmpty() }) {
+
+        if (uploadedChunkCount < chunkCount) {
             throw Exception("上传失败")
         }
+
         val mixFile =
             MixFile(
                 chunkSize = fixedChunkSize,
                 version = 0,
-                fileList = fileList,
-                fileSize = fileSize
+                fileList = chunkList,
+                fileSize = totalChunkSize
             )
+
         val mixFileData = mixFile.toBytes()
         val mixFileUrl =
             uploader.upload(head, mixFileData, secret, this@doUploadFile)
-        return@coroutineScope mixFileUrl
+
+        return@coroutineScope mixFileUrl to totalChunkSize
     }
 }

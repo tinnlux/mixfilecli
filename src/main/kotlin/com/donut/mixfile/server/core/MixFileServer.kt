@@ -52,7 +52,7 @@ abstract class MixFileServer(
         override suspend fun complete(shareInfo: MixShareInfo) {
         }
 
-        override val onStop: MutableList<suspend () -> Unit> = mutableListOf()
+        override val stopFunc: MutableList<suspend () -> Unit> = mutableListOf()
 
         override suspend fun updateProgress(size: Long, total: Long) {
         }

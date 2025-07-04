@@ -25,16 +25,13 @@ data class MixFile(
     }
 
     fun getFileListByStartRange(startRange: Long): List<Pair<String, Int>> {
-        val start = startRange / chunkSize
-        val rangeFileList = fileList.subList(start.toInt(), fileList.size)
-        val startOffset = startRange % chunkSize
-        val result = mutableListOf<Pair<String, Int>>()
-        for (i in rangeFileList.indices) {
-            val file = rangeFileList[i]
-            val offset = if (i == 0) startOffset else 0
-            result.add(Pair(file, offset.toInt()))
-        }
-        return result
+        val startIndex = (startRange / chunkSize).toInt()
+        val startOffset = (startRange % chunkSize).toInt()
+        return fileList.subList(startIndex, fileList.size)
+            .mapIndexed { index, file ->
+                val offset = if (index == 0) startOffset else 0
+                file to offset
+            }
     }
 
 

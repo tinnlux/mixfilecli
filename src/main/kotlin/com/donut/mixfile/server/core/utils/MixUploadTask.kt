@@ -6,6 +6,10 @@ interface MixUploadTask {
     var error: Throwable?
     var stopped: Boolean
     suspend fun complete(shareInfo: MixShareInfo)
-    val onStop: MutableList<suspend () -> Unit>
+    val stopFunc: MutableList<suspend () -> Unit>
     suspend fun updateProgress(size: Long, total: Long)
+    fun stop(error: Throwable?) {
+        stopped = true
+        this.error = error
+    }
 }
