@@ -10,3 +10,6 @@ java -jar -XX:+UseZGC mixfile-cli-版本.jar
 
 # 下载
 https://github.com/InvertGeek/mixfilecli/releases
+
+## Core Module
+https://github.com/InvertGeek/mixfile-core
