@@ -7,10 +7,13 @@ plugins {
     java // 确保应用了 Java 插件
     kotlin("jvm") version "2.1.20"
     id("io.ktor.plugin") version "3.1.2"
+    `maven-publish`
 }
+val projectVersion = "1.11.3"
 
 group = "com.donut.mixfilecli"
-version = "1.11.3"
+version = projectVersion
+
 
 application {
     mainClass.set("com.donut.mixfilecli.ApplicationKt")
@@ -20,6 +23,22 @@ application {
 
 }
 
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"]) // Java 项目，或 components["kotlin"] 对于 Kotlin Multiplatform
+            groupId = "com.donut"
+            artifactId = "mixfilecli"
+            version = projectVersion
+        }
+    }
+
+    repositories {
+        maven("https://jitpack.io")
+        mavenLocal() // 发布到本地仓库
+    }
+}
 
 
 java {
@@ -40,6 +59,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
 
 
 repositories {
+    maven("https://jitpack.io")
     mavenCentral()
 }
 
@@ -50,17 +70,12 @@ ktor {
 }
 
 dependencies {
+    implementation("com.github.InvertGeek:mixfile-core:1.0.1")
     implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.56")
     implementation("io.ktor:ktor-client-core")
     implementation("io.ktor:ktor-client-okhttp")
     implementation("io.ktor:ktor-client-logging")
     implementation("io.ktor:ktor-client-content-negotiation")
-    implementation("io.ktor:ktor-server-core")
-    implementation("io.ktor:ktor-server-netty")
-    implementation("io.ktor:ktor-server-default-headers")
-    implementation("io.ktor:ktor-server-status-pages")
-    implementation("io.ktor:ktor-server-cors")
-    implementation("io.ktor:ktor-server-content-negotiation")
     implementation("com.sksamuel.hoplite:hoplite-core:2.8.2")
     implementation("com.sksamuel.hoplite:hoplite-yaml:2.8.2")
     implementation("ch.qos.logback:logback-classic:1.3.15")
