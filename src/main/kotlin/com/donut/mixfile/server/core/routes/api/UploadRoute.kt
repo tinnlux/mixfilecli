@@ -32,7 +32,7 @@ fun MixFileServer.getUploadRoute(): RoutingHandler {
 
         call.respondText(uploadFile(call.receiveChannel(), name, size, add.toBoolean()) {
             call.respondText("上传已取消", status = HttpStatusCode.InternalServerError)
-        })
+        }.first)
     }
 }
 
@@ -43,7 +43,7 @@ suspend fun MixFileServer.uploadFile(
     add: Boolean = true,
     key: ByteArray = generateRandomByteArray(32),
     onStop: suspend () -> Unit = {}
-): String {
+): Pair<String, Long> {
 
     val uploadTask = getUploadTask(name, size, add)
 
@@ -70,7 +70,7 @@ suspend fun MixFileServer.uploadFile(
             referer = uploader.referer
         )
     uploadTask.complete(mixShareInfo)
-    return mixShareInfo.toString()
+    return mixShareInfo.toString() to fileSize
 }
 
 private suspend fun MixFileServer.doUploadFile(

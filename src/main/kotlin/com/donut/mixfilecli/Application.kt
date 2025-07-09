@@ -7,9 +7,9 @@ import com.donut.mixfile.server.core.MixFileServer
 import com.donut.mixfile.server.core.Uploader
 import com.donut.mixfile.server.core.objects.MixShareInfo
 import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavManager
+import com.donut.mixfile.server.core.uploaders.A1Uploader
+import com.donut.mixfile.server.core.uploaders.A2Uploader
 import com.donut.mixfile.server.core.uploaders.A3Uploader
-import com.donut.mixfile.server.core.uploaders.hidden.A1Uploader
-import com.donut.mixfile.server.core.uploaders.hidden.A2Uploader
 import com.donut.mixfile.server.core.utils.MixUploadTask
 import com.donut.mixfile.server.core.utils.compressGzip
 import com.donut.mixfile.server.core.utils.decompressGzip

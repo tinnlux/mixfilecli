@@ -151,9 +151,14 @@ fun MixFileServer.getWebDAVRoute(): Route.() -> Unit {
                 call.respond(HttpStatusCode.Conflict)
                 return@webdav
             }
-            val shareInfo = uploadFile(call.receiveChannel(), davFileName, fileSize, add = false)
+            val (shareInfo, finalSize) = uploadFile(
+                call.receiveChannel(),
+                davFileName,
+                fileSize,
+                add = false
+            )
             val fileNode =
-                WebDavFile(size = fileSize, shareInfoData = shareInfo, name = davFileName)
+                WebDavFile(size = finalSize, shareInfoData = shareInfo, name = davFileName)
             webDav.addFileNode(davParentPath, fileNode)
             call.respond(HttpStatusCode.Created)
             webDav.saveData()
@@ -164,6 +169,10 @@ fun MixFileServer.getWebDAVRoute(): Route.() -> Unit {
             webDav.saveData()
         }
         webdav("MKCOL") {
+            if (davPath.isEmpty()) {
+                call.respond(HttpStatusCode.Created)
+                return@webdav
+            }
             val fileList = webDav.listFiles(davParentPath)
             if (fileList == null) {
                 call.respond(HttpStatusCode.Conflict)
