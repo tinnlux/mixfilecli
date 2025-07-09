@@ -1,4 +1,4 @@
-package com.donut.mixfile.server
+package com.donut.mixfilecli.utils
 
 import com.donut.mixfile.server.core.Uploader
 import com.donut.mixfilecli.config

@@ -2,7 +2,7 @@ package com.donut.mixfilecli
 
 import com.alibaba.fastjson2.into
 import com.alibaba.fastjson2.toJSONString
-import com.donut.mixfile.server.CustomUploader
+import com.donut.mixfilecli.utils.CustomUploader
 import com.donut.mixfile.server.core.MixFileServer
 import com.donut.mixfile.server.core.Uploader
 import com.donut.mixfile.server.core.objects.MixShareInfo
@@ -15,9 +15,9 @@ import com.donut.mixfile.server.core.utils.compressGzip
 import com.donut.mixfile.server.core.utils.decompressGzip
 import com.donut.mixfile.server.core.utils.extensions.kb
 import com.donut.mixfile.server.core.utils.findAvailablePort
-import com.donut.mixfile.util.file.addUploadLog
-import com.donut.mixfile.util.file.formatFileSize
-import com.donut.mixfile.util.file.uploadLogs
+import com.donut.mixfilecli.utils.addUploadLog
+import com.donut.mixfilecli.utils.formatFileSize
+import com.donut.mixfilecli.utils.uploadLogs
 import com.sksamuel.hoplite.ConfigLoaderBuilder
 import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
