@@ -7,7 +7,6 @@ plugins {
     java // 确保应用了 Java 插件
     kotlin("jvm") version "2.1.20"
     id("io.ktor.plugin") version "3.1.2"
-    `maven-publish`
 }
 val projectVersion = "1.11.3"
 
@@ -23,22 +22,6 @@ application {
 
 }
 
-
-publishing {
-    publications {
-        create<MavenPublication>("mavenJava") {
-            from(components["java"]) // Java 项目，或 components["kotlin"] 对于 Kotlin Multiplatform
-            groupId = "com.donut"
-            artifactId = "mixfilecli"
-            version = projectVersion
-        }
-    }
-
-    repositories {
-        maven("https://jitpack.io")
-        mavenLocal() // 发布到本地仓库
-    }
-}
 
 
 java {
