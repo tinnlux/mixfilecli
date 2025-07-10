@@ -53,7 +53,7 @@ ktor {
 }
 
 dependencies {
-    implementation("com.github.InvertGeek:mixfile-core:1.0.2")
+    implementation("com.github.InvertGeek:mixfile-core:1.0.3")
     implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.56")
     implementation("io.ktor:ktor-client-core")
     implementation("io.ktor:ktor-client-okhttp")
