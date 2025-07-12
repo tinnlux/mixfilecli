@@ -39,7 +39,7 @@ import javax.imageio.stream.ImageOutputStream
 import javax.imageio.stream.MemoryCacheImageOutputStream
 
 data class Config(
-    val uploader: String = "线路A1",
+    val uploader: String = A2Uploader.name,
     val uploadTask: Int = 10,
     val downloadTask: Int = 5,
     val uploadRetry: Int = 10,
