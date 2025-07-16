@@ -1,7 +1,5 @@
 package com.donut.mixfilecli
 
-import com.alibaba.fastjson2.into
-import com.alibaba.fastjson2.toJSONString
 import com.donut.mixfile.server.core.MixFileServer
 import com.donut.mixfile.server.core.Uploader
 import com.donut.mixfile.server.core.objects.MixShareInfo
@@ -9,11 +7,8 @@ import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavManager
 import com.donut.mixfile.server.core.uploaders.A1Uploader
 import com.donut.mixfile.server.core.uploaders.A2Uploader
 import com.donut.mixfile.server.core.uploaders.A3Uploader
-import com.donut.mixfile.server.core.utils.MixUploadTask
-import com.donut.mixfile.server.core.utils.compressGzip
-import com.donut.mixfile.server.core.utils.decompressGzip
+import com.donut.mixfile.server.core.utils.*
 import com.donut.mixfile.server.core.utils.extensions.kb
-import com.donut.mixfile.server.core.utils.findAvailablePort
 import com.donut.mixfilecli.utils.CustomUploader
 import com.donut.mixfilecli.utils.addUploadLog
 import com.donut.mixfilecli.utils.formatFileSize
@@ -143,7 +138,7 @@ fun main(args: Array<String>) {
 
     if (historyFile.exists()) {
         try {
-            uploadLogs = decompressGzip(historyFile.readBytes()).into()
+            uploadLogs = decompressGzip(historyFile.readBytes()).parseJsonObject()
         } catch (e: Exception) {
             e.printStackTrace()
             throw Error("载入上传历史文件失败: " + e.message)
@@ -193,7 +188,7 @@ fun main(args: Array<String>) {
         }
 
         override suspend fun getFileHistory(): String {
-            return uploadLogs.asReversed().toJSONString()
+            return uploadLogs.asReversed().toJsonString()
         }
 
 
@@ -208,7 +203,7 @@ fun main(args: Array<String>) {
                         addUploadLog(shareInfo)
                         val file = File(config.history)
                         file.parentFile?.mkdirs()
-                        file.writeBytes(compressGzip(uploadLogs.toJSONString()))
+                        file.writeBytes(compressGzip(uploadLogs.toJsonString()))
                     }
                 }
 

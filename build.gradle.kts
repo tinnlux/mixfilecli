@@ -5,8 +5,8 @@ val logback_version: String by project
 
 plugins {
     java // 确保应用了 Java 插件
-    kotlin("jvm") version "2.1.20"
-    id("io.ktor.plugin") version "3.1.2"
+    kotlin("jvm") version "2.2.0"
+    id("io.ktor.plugin") version "3.2.2"
 }
 val projectVersion = "1.11.3"
 
@@ -53,8 +53,7 @@ ktor {
 }
 
 dependencies {
-    implementation("com.github.InvertGeek:mixfile-core:1.0.5")
-    implementation("com.alibaba.fastjson2:fastjson2-kotlin:2.0.56")
+    implementation("com.github.InvertGeek:mixfile-core:29649ca8f5")
     implementation("io.ktor:ktor-client-core")
     implementation("io.ktor:ktor-client-okhttp")
     implementation("io.ktor:ktor-client-logging")
