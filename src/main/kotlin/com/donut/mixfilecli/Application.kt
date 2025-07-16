@@ -149,6 +149,7 @@ fun main(args: Array<String>) {
 
     val server = object : MixFileServer(
         serverPort = config.port,
+        host = config.host
     ) {
         override val downloadTaskCount: Int
             get() = config.downloadTask
