@@ -53,7 +53,7 @@ ktor {
 }
 
 dependencies {
-    implementation("com.github.InvertGeek:mixfile-core:5ea7f30529")
+    implementation("com.github.InvertGeek:mixfile-core:1.0.6")
     implementation("io.ktor:ktor-client-core")
     implementation("io.ktor:ktor-client-okhttp")
     implementation("io.ktor:ktor-client-logging")
