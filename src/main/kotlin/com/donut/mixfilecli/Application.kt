@@ -109,16 +109,22 @@ fun main(args: Array<String>) {
 
     fun getCurrentUploader() = UPLOADERS.firstOrNull { it.name.contentEquals(config.uploader) } ?: A1Uploader
 
-    val webDavManager = object : WebDavManager() {
-        val mutex = Mutex()
-        override suspend fun saveWebDavData(data: ByteArray) {
-            mutex.withLock {
-                val file = File(config.webdavPath)
-                file.parentFile?.mkdirs()
-                file.writeBytes(data)
-            }
+    val saveMutex = Mutex()
+
+    suspend fun saveFileData(path: String, data: ByteArray) {
+        saveMutex.withLock {
+            val file = File(path)
+            file.parentFile?.mkdirs()
+            file.writeBytes(data)
         }
     }
+
+    val webDavManager = object : WebDavManager() {
+        override suspend fun saveWebDavData(data: ByteArray) {
+            saveFileData(config.webdavPath, data)
+        }
+    }
+
 
     val webDavFile = File(config.webdavPath)
     val historyFile = File(config.history)
@@ -198,9 +204,7 @@ fun main(args: Array<String>) {
                     logger.info("文件上传成功: ${shareInfo.fileName} ${formatFileSize(shareInfo.fileSize)}")
                     if (add) {
                         addUploadLog(shareInfo)
-                        val file = File(config.history)
-                        file.parentFile?.mkdirs()
-                        file.writeBytes(compressGzip(uploadLogs.toJsonString()))
+                        saveFileData(config.history, compressGzip(uploadLogs.toJsonString()))
                     }
                 }
 
