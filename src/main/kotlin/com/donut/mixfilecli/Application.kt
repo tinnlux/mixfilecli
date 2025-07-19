@@ -229,7 +229,9 @@ fun checkConfig() {
     val outputFile = File(currentDir, "config.yml")
     if (!outputFile.exists()) {
         FileOutputStream(outputFile).use { outputStream ->
-            inputStream?.copyTo(outputStream)
+            inputStream.use {
+                it?.copyTo(outputStream)
+            }
         }
     }
 }
