@@ -18,7 +18,9 @@ import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
 import io.ktor.util.cio.*
 import io.ktor.utils.io.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.slf4j.LoggerFactory
@@ -53,7 +55,7 @@ var config: Config = Config()
 fun createRandomGifByteArray(): ByteArray {
     val random = Random()
 
-    // 随机生成GIF的宽度和高度（50-200像素之间）
+    // 随机生成GIF的宽度和高度（50-150像素之间）
     val width = random.nextInt(101) + 50
     val height = random.nextInt(101) + 50
 
@@ -102,24 +104,18 @@ fun main(args: Array<String>) {
         .build()
         .loadConfigOrThrow<Config>()
     println(config)
+
     val UPLOADERS = listOf(A1Uploader, A2Uploader, A3Uploader, CustomUploader)
 
     fun getCurrentUploader() = UPLOADERS.firstOrNull { it.name.contentEquals(config.uploader) } ?: A1Uploader
 
     val webDavManager = object : WebDavManager() {
         val mutex = Mutex()
-        var saveTask: Job? = null
         override suspend fun saveWebDavData(data: ByteArray) {
-            synchronized(this) {
-                saveTask?.cancel()
-                saveTask = appScope.launch {
-                    mutex.withLock {
-                        delay(100)
-                        val file = File(config.webdavPath)
-                        file.parentFile?.mkdirs()
-                        file.writeBytes(data)
-                    }
-                }
+            mutex.withLock {
+                val file = File(config.webdavPath)
+                file.parentFile?.mkdirs()
+                file.writeBytes(data)
             }
         }
     }
