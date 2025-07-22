@@ -31,7 +31,7 @@ object CustomUploader : Uploader("自定义") {
     override val referer: String
         get() = CUSTOM_REFERER
 
-    override suspend fun doUpload(fileData: ByteArray, client: HttpClient): String {
+    override suspend fun doUpload(fileData: ByteArray, client: HttpClient, headSize: Int): String {
         val response = client.put {
             url(CUSTOM_UPLOAD_URL)
             setBody(fileData)

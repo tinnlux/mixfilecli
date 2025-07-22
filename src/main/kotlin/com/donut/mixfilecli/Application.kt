@@ -7,6 +7,7 @@ import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavManager
 import com.donut.mixfile.server.core.uploaders.A1Uploader
 import com.donut.mixfile.server.core.uploaders.A2Uploader
 import com.donut.mixfile.server.core.uploaders.A3Uploader
+import com.donut.mixfile.server.core.uploaders.js.JSUploader
 import com.donut.mixfile.server.core.utils.*
 import com.donut.mixfile.server.core.utils.extensions.kb
 import com.donut.mixfilecli.utils.CustomUploader
@@ -18,9 +19,7 @@ import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
 import io.ktor.util.cio.*
 import io.ktor.utils.io.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.Job
+import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.slf4j.LoggerFactory
@@ -35,8 +34,10 @@ import javax.imageio.ImageIO
 import javax.imageio.stream.ImageOutputStream
 import javax.imageio.stream.MemoryCacheImageOutputStream
 
+val defaultUploader = A2Uploader
+
 data class Config(
-    val uploader: String = A2Uploader.name,
+    val uploader: String = defaultUploader.name,
     val uploadTask: Int = 10,
     val downloadTask: Int = 5,
     val uploadRetry: Int = 10,
@@ -106,8 +107,16 @@ fun main(args: Array<String>) {
     println(config)
 
     val UPLOADERS = listOf(A1Uploader, A2Uploader, A3Uploader, CustomUploader)
+    var currentUploader = UPLOADERS.firstOrNull { it.name.contentEquals(config.uploader) } ?: defaultUploader
 
-    fun getCurrentUploader() = UPLOADERS.firstOrNull { it.name.contentEquals(config.uploader) } ?: A1Uploader
+    if (config.uploader.lowercase().endsWith(".js")) {
+        val jsFile = File(config.uploader)
+        if (jsFile.exists()) {
+            val code = jsFile.readText(Charsets.UTF_8)
+            currentUploader = JSUploader("JSUploader", code)
+        }
+    }
+
 
     val saveMutex = Mutex()
 
@@ -182,7 +191,7 @@ fun main(args: Array<String>) {
         }
 
         override fun getUploader(): Uploader {
-            return getCurrentUploader()
+            return currentUploader
         }
 
 

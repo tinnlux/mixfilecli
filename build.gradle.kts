@@ -8,7 +8,7 @@ plugins {
     kotlin("jvm") version "2.2.0"
     id("io.ktor.plugin") version "3.2.2"
 }
-val projectVersion = "1.11.3"
+val projectVersion = "1.11.4"
 
 group = "com.donut.mixfilecli"
 version = projectVersion
@@ -44,6 +44,7 @@ tasks.withType<org.jetbrains.kotlin.gradle.tasks.KotlinCompile>().configureEach 
 repositories {
     maven("https://jitpack.io")
     mavenCentral()
+    mavenLocal()
 }
 
 ktor {
@@ -53,7 +54,7 @@ ktor {
 }
 
 dependencies {
-    implementation("com.github.InvertGeek:mixfile-core:1.0.6")
+    implementation("com.github.InvertGeek:mixfile-core:66e70b8bb5")
     implementation("io.ktor:ktor-client-core")
     implementation("io.ktor:ktor-client-okhttp")
     implementation("io.ktor:ktor-client-logging")
@@ -66,4 +67,5 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
 //    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
+    implementation(kotlin("stdlib-jdk8"))
 }
