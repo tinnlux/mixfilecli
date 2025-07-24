@@ -54,7 +54,7 @@ ktor {
 }
 
 dependencies {
-    implementation("com.github.InvertGeek:mixfile-core:66e70b8bb5")
+    implementation("com.github.InvertGeek:mixfile-core:a0bd1f7751")
     implementation("io.ktor:ktor-client-core")
     implementation("io.ktor:ktor-client-okhttp")
     implementation("io.ktor:ktor-client-logging")
@@ -67,5 +67,4 @@ dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-android:1.9.0")
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.9.0")
 //    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
-    implementation(kotlin("stdlib-jdk8"))
 }

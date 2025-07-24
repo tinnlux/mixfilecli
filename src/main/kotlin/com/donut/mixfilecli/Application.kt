@@ -7,7 +7,7 @@ import com.donut.mixfile.server.core.routes.api.webdav.objects.WebDavManager
 import com.donut.mixfile.server.core.uploaders.A1Uploader
 import com.donut.mixfile.server.core.uploaders.A2Uploader
 import com.donut.mixfile.server.core.uploaders.A3Uploader
-import com.donut.mixfile.server.core.uploaders.js.JSUploader
+import com.donut.mixfile.server.core.uploaders.base.js.JSUploader
 import com.donut.mixfile.server.core.utils.*
 import com.donut.mixfile.server.core.utils.extensions.kb
 import com.donut.mixfilecli.utils.CustomUploader
@@ -19,7 +19,9 @@ import com.sksamuel.hoplite.ExperimentalHoplite
 import com.sksamuel.hoplite.addFileSource
 import io.ktor.util.cio.*
 import io.ktor.utils.io.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import org.slf4j.LoggerFactory
@@ -96,6 +98,8 @@ fun createRandomGifByteArray(): ByteArray {
 
 val appScope = CoroutineScope(Dispatchers.Default + Job())
 
+val UPLOADERS = listOf(A1Uploader, A2Uploader, A3Uploader, CustomUploader)
+
 @OptIn(ExperimentalHoplite::class)
 fun main(args: Array<String>) {
     checkConfig()
@@ -106,14 +110,16 @@ fun main(args: Array<String>) {
         .loadConfigOrThrow<Config>()
     println(config)
 
-    val UPLOADERS = listOf(A1Uploader, A2Uploader, A3Uploader, CustomUploader)
     var currentUploader = UPLOADERS.firstOrNull { it.name.contentEquals(config.uploader) } ?: defaultUploader
 
     if (config.uploader.lowercase().endsWith(".js")) {
         val jsFile = File(config.uploader)
         if (jsFile.exists()) {
             val code = jsFile.readText(Charsets.UTF_8)
-            currentUploader = JSUploader("JSUploader", code)
+            currentUploader = object : JSUploader("JSUploader") {
+                override val scriptCode: String
+                    get() = code
+            }
         }
     }
 
