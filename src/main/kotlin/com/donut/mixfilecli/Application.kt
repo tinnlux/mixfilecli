@@ -1,5 +1,6 @@
 package com.donut.mixfilecli
 
+import com.charleskorn.kaml.Yaml
 import com.donut.mixfile.server.core.MixFileServer
 import com.donut.mixfile.server.core.Uploader
 import com.donut.mixfile.server.core.objects.MixShareInfo
@@ -14,9 +15,6 @@ import com.donut.mixfilecli.utils.CustomUploader
 import com.donut.mixfilecli.utils.addUploadLog
 import com.donut.mixfilecli.utils.formatFileSize
 import com.donut.mixfilecli.utils.uploadLogs
-import com.sksamuel.hoplite.ConfigLoaderBuilder
-import com.sksamuel.hoplite.ExperimentalHoplite
-import com.sksamuel.hoplite.addFileSource
 import io.ktor.util.cio.*
 import io.ktor.utils.io.*
 import kotlinx.coroutines.CoroutineScope
@@ -24,6 +22,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
+import kotlinx.serialization.SerialName
+import kotlinx.serialization.Serializable
+import kotlinx.serialization.decodeFromString
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.awt.image.BufferedImage
@@ -38,17 +39,25 @@ import javax.imageio.stream.MemoryCacheImageOutputStream
 
 val defaultUploader = A2Uploader
 
+@Serializable
 data class Config(
     val uploader: String = defaultUploader.name,
+    @SerialName("upload_task")
     val uploadTask: Int = 10,
+    @SerialName("download_task")
     val downloadTask: Int = 5,
+    @SerialName("upload_retry")
     val uploadRetry: Int = 10,
+    @SerialName("chunk_size")
     val chunkSize: Int = 1024,
     val port: Int = 4719,
+    @SerialName("custom_url")
     val customUrl: String = "",
+    @SerialName("custom_referer")
     val customReferer: String = "",
     val host: String = "0.0.0.0",
     val password: String = "",
+    @SerialName("webdav_path")
     val webdavPath: String = "data.mix_dav",
     val history: String = "history.mix_list"
 )
@@ -100,16 +109,13 @@ val appScope = CoroutineScope(Dispatchers.Default + Job())
 
 val UPLOADERS = listOf(A1Uploader, A2Uploader, A3Uploader, CustomUploader)
 
-@OptIn(ExperimentalHoplite::class)
+
 fun main(args: Array<String>) {
     checkConfig()
-    config = ConfigLoaderBuilder.default()
-        .addFileSource("config.yml")
-        .withExplicitSealedTypes()
-        .build()
-        .loadConfigOrThrow<Config>()
-    println(config)
-
+    config = Yaml.default.decodeFromString(File("config.yml").readText(Charsets.UTF_8))
+    println("========== 已加载配置 ==========")
+    println(Yaml.default.encodeToString(Config.serializer(), config))
+    println("===================================")
     var currentUploader = UPLOADERS.firstOrNull { it.name.contentEquals(config.uploader) } ?: defaultUploader
 
     if (config.uploader.lowercase().endsWith(".js")) {
