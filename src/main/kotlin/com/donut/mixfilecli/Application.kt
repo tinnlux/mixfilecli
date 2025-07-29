@@ -28,10 +28,8 @@ import kotlinx.serialization.decodeFromString
 import org.slf4j.LoggerFactory
 import java.awt.Color
 import java.awt.image.BufferedImage
-import java.io.ByteArrayOutputStream
-import java.io.File
-import java.io.FileOutputStream
-import java.io.InputStream
+import java.io.*
+import java.nio.charset.StandardCharsets
 import java.util.*
 import javax.imageio.ImageIO
 import javax.imageio.stream.ImageOutputStream
@@ -112,6 +110,8 @@ val UPLOADERS = listOf(A1Uploader, A2Uploader, A3Uploader, CustomUploader)
 
 fun main(args: Array<String>) {
     checkConfig()
+    // 替换 System.out，使其用 UTF-8 编码
+    System.setOut(PrintStream(System.out, true, StandardCharsets.UTF_8.name()))
     config = Yaml.default.decodeFromString(File("config.yml").readText(Charsets.UTF_8))
     println("========== 已加载配置 ==========")
     println(Yaml.default.encodeToString(Config.serializer(), config))
