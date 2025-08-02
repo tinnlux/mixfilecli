@@ -185,6 +185,9 @@ fun main(args: Array<String>) {
         override val uploadRetryCount
             get() = config.uploadRetry
 
+        override val downloadRetryCount
+            get() = config.downloadRetry
+
         override val password: String
             get() = config.password
 
