@@ -56,7 +56,7 @@ ktor {
 
 dependencies {
     implementation("com.charleskorn.kaml:kaml:0.79.0")
-    implementation("com.github.InvertGeek:mixfile-core:1.1.2")
+    implementation("com.github.InvertGeek:mixfile-core:27480f38c6")
     implementation("io.ktor:ktor-client-core")
     implementation("io.ktor:ktor-client-okhttp")
     implementation("io.ktor:ktor-client-logging")

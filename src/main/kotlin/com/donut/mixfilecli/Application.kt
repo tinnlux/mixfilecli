@@ -46,6 +46,8 @@ data class Config(
     val downloadTask: Int = 5,
     @SerialName("upload_retry")
     val uploadRetry: Int = 10,
+    @SerialName("download_retry")
+    val downloadRetry: Int = 3,
     @SerialName("chunk_size")
     val chunkSize: Int = 1024,
     val port: Int = 4719,
