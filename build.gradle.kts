@@ -56,11 +56,7 @@ ktor {
 
 dependencies {
     implementation("com.charleskorn.kaml:kaml:0.79.0")
-    implementation("com.github.InvertGeek:mixfile-core:1.1.3")
-    implementation("io.ktor:ktor-client-core")
-    implementation("io.ktor:ktor-client-okhttp")
-    implementation("io.ktor:ktor-client-logging")
-    implementation("io.ktor:ktor-client-content-negotiation")
+    implementation("com.github.invertgeek:mixfile-core:c9f3119aca")
     implementation("ch.qos.logback:logback-classic:1.3.15")
     testImplementation("io.ktor:ktor-server-test-host")
     testImplementation("org.jetbrains.kotlin:kotlin-test-junit:$kotlin_version")
