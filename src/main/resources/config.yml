@@ -12,9 +12,9 @@ chunk_size: 1024
 # 端口
 port: 4719
 host: "0.0.0.0"
-# 自定义线路url
+# http自定义线路url
 custom_url: ""
-#自定义线路referer
+# http自定义线路referer
 custom_referer: ""
 webdav_path: "data.mix_dav"
 # 密码 留空为取消密码
