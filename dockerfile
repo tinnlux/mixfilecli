@@ -12,7 +12,7 @@ RUN apt-get update && apt-get install -y wget && \
 ENV JAVA_OPTS="-XX:+UseZGC"
 
 # 暴露端口（根据需要调整）
-EXPOSE 8080
+EXPOSE 4719
 
 # 运行命令
 CMD ["java", "-jar", "/app/mixfile-cli.jar"]
